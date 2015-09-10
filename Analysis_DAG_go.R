@@ -15,7 +15,7 @@ source("tef_analysis_functions_2015.R")
 setwd("../../i1sz/")
 statdir <- file.path("output")
 if (!file.exists(statdir)){
-	dir.create(statdir)
+    dir.create(statdir)
 }
 
 
@@ -39,11 +39,12 @@ DAG6 <- sapply(DAG$V6, function(n) unlist(strsplit(as.character(n), "||", fixed=
 dim(DAG6) <- c(9, n)
 DAG6 <- t(DAG6)
 
-densChr1 <- apply(DAG6[DAG6[,1]=='1',2:3], 1, function(cord) seq(as.numeric(cord[1]), as.numeric(cord[2])) )
+#densChr1 <- apply(DAG6[DAG6[,1]=='1',2:3], 1, function(cord) seq(as.numeric(cord[1]), as.numeric(cord[2])) )
 
 densChr1.10 <- apply(DAG6[DAG6[,1]=='1',2:3], 1, function(cord) seq(as.numeric(cord[1])/10, as.numeric(cord[2])/10) )
-
-hist(floor(unlist(densChr1.10)), freq=FALSE, breaks=diff(range(densChr1))/10)
+pdf(file="density_map_chromosom1.pdf", paper="a4r", width = (2967/150)/2.54, height = (2099/150)/2.54)
+hist(floor(unlist(densChr1.10)), freq=FALSE, breaks=diff(range(densChr1.10))/10)
+dev.off()
 # 1. Error: unexpected numeric constant in "ulimit -t 600"
 # 2. Killed
 

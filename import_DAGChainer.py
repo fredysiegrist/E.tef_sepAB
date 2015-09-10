@@ -43,8 +43,24 @@ for n in range(1, 10):
     print(lol[n][0]+' '+str(int(lol[n][2])-int(lol[n][6]))+' '+lol[n][4])
     print(str(lol[n][1]).split('||'))
 
+# OK, I understand I should use english, but I have to violate this rule,
+# from time to time.
 print('\n\nTest phase over! Starting real life: Раз Два Три\n\n')
 
 # Calculate for same Sorghum chromosome gene the distances
+##############################################################################
 # Line character length should be max 72 comments and 79 code: testing that
 ##############################################################################
+
+
+"""
+# Here is a code-chunk to easely import fasta files
+from Bio import SeqIO
+
+fasta_sequences = SeqIO.parse(open(input_file),'fasta')
+with open(output_file) as out_file:
+    for fasta in fasta_sequences:
+        name, sequence = fasta.id, fasta.seq.tostring()
+        new_sequence = some_function(sequence)
+        write_fasta(out_file)
+"""
