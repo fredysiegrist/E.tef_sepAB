@@ -20,7 +20,7 @@ if (!file.exists(statdir)){
 
 
 # Adressing the files
-DAG <- read.delim(file="22790_24796.CDS-CDS.last.tdd10.cs0.filtered.dag.all2.go", header=FALSE, skip=1)
+DAG <- read.delim(file="22790_24796.CDS-CDS.last.tdd10.cs0.filtered.dag.all.go", header=FALSE, skip=1)
 head(DAG, 25)
 
 # Number of mapps
