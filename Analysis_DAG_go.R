@@ -49,9 +49,16 @@ DAG6 <- t(DAG6)
 # 2. Killed
 
 # Trunk to print out all chromosome profiles in one pdf file.
-pdf(file="density_map_chromosomes.pdf", paper="a4r", width = (2967/150)/2.54, height = (2099/150)/2.54)
+pdf(file="/output/density_map_chromosomes.pdf", paper="a4r", width = (2967/150)/2.54, height = (2099/150)/2.54)
 par(mfrow=c(2,5))
 for (n in as.character(1:10)) {
     chrDensPlot(n)
 }
 dev.off()
+
+
+# do number
+
+has for gene names / how many times gene name is covered /
+build a test case to check code
+read and summarize papaya/peach chapter in "Genetics and Genomics of Papaya"

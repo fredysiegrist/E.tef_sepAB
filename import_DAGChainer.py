@@ -53,10 +53,13 @@ print('\n\nTest phase over! Starting real life: Раз Два Три\n\n')
 ##############################################################################
 
 
-"""
+
 # Here is a code-chunk to easely import fasta files
 from Bio import SeqIO
-
+input_file='/windows/GNY98ter_41.closed'
+output_file='/windows/GNY98.pyout'
+print(fasta.id+fasta.seq.tostring())
+"""
 fasta_sequences = SeqIO.parse(open(input_file),'fasta')
 with open(output_file) as out_file:
     for fasta in fasta_sequences:
