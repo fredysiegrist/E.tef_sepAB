@@ -1,9 +1,9 @@
 __author__ = 'fsiegris'
 # Date: 07.09.2015
 
-# from recipe-577444-1 import *
-
 import csv
+
+from Bio import SeqIO, SeqFeature
 
 from tef_functions_FS2015 import *
 
@@ -43,9 +43,10 @@ for n in range(1, 10):
     print(lol[n][0]+' '+str(int(lol[n][2])-int(lol[n][6]))+' '+lol[n][4])
     print(str(lol[n][1]).split('||'))
 
-# OK, I understand I should use english, but I have to violate this rule,
-# from time to time.
-print('\n\nTest phase over! Starting real life: Раз Два Три\n\n')
+for p in range(1, 10):
+    print(str(lol[p][5]).split('||'))
+
+input('\nPaused --- Press Enter to continue')
 
 # Calculate for same Sorghum chromosome gene the distances
 ##############################################################################
@@ -53,17 +54,51 @@ print('\n\nTest phase over! Starting real life: Раз Два Три\n\n')
 ##############################################################################
 
 
+# Build up a hash-table with scaffold name and ( chr, (start, end), orientation )
+
+D = {}
+for q in range(1, len(lol)):
+    if str(lol[q][1]).split('||')[0] in D:
+        D[(str(lol[q][1]).split('||')[0])].extend([(int(str(lol[q][5]).split('||')[0]),(int(str(lol[q][5]).split('||')[1]),int(str(lol[q][5]).split('||')[2])),int(str(lol[q][1]).split('||')[4]))])
+    else:
+        D[(str(lol[q][1]).split('||')[0])] = [(int(str(lol[q][5]).split('||')[0]),(int(str(lol[q][5]).split('||')[1]),int(str(lol[q][5]).split('||')[2])),int(str(lol[q][1]).split('||')[4]))]
+
+print(D['scaffold14093'])
+print( "Value : %s" %  D.keys())
+
+
+input('\nPaused --- Press Enter to continue')
+
+
+# OK, I understand I should use english, but I have to violate this rule,
+# from time to time.
+print('\n\nTest phase over! Starting real life: Раз Два Три\n\n')
+
 
 # Here is a code-chunk to easely import fasta files
-from Bio import SeqIO
+
 input_file='/windows/GNY98ter_41.closed'
 output_file='/windows/GNY98.pyout'
-print(fasta.id+fasta.seq.tostring())
-"""
 fasta_sequences = SeqIO.parse(open(input_file),'fasta')
-with open(output_file) as out_file:
+"""with open(output_file) as out_file:
     for fasta in fasta_sequences:
-        name, sequence = fasta.id, fasta.seq.tostring()
-        new_sequence = some_function(sequence)
-        write_fasta(out_file)
+        #name, sequence = fasta.id, fasta.seq.tostring()
+        #new_sequence = some_function(sequence)
+        #write_fasta(out_file)
+        print(fasta.id+' '+fasta.seq.tostring())"""
+
 """
+Read in all E. tef scaffolds and echos scaffold name and nucleotide sequence
+
+"""
+
+
+# Search scaffolds on DAGchainer document and build up hash links to the fasta file nucleotide information
+from time import sleep
+for fasta in fasta_sequences:
+    try:
+        print(' '+fasta.id[3:]+' '+str(D[fasta.id[3:]]))
+    except:
+        pass #print(fasta.id[3:]+' '+'Not found.')
+    finally:
+         pass #sleep(0.01)

@@ -48,6 +48,9 @@ DAG6 <- t(DAG6)
 # 1. Error: unexpected numeric constant in "ulimit -t 600"
 # 2. Killed
 
+# Test case for the first 20 entries on chromosome 1.
+chrDensPlot('1', data=DAG6[1:100,])
+
 # Trunk to print out all chromosome profiles in one pdf file.
 pdf(file=paste(getwd(),"/output/density_map_chromosomes.pdf", sep=""), paper="a4r", width = (2967/150)/2.54, height = (2099/150)/2.54)
 par(mfrow=c(2,5))
@@ -59,6 +62,17 @@ dev.off()
 
 # do number
 
-has for gene names / how many times gene name is covered /
+"""has for gene names / how many times gene name is covered /
 build a test case to check code
-read and summarize papaya/peach chapter in "Genetics and Genomics of Papaya"
+read and summarize papaya/peach chapter in "Genetics and Genomics of Papaya" """
+
+"""
+plot(DAG6[order(DAG6[,8]),1], 1:n)
+DAG6[order(as.numeric(DAG6[,8])),8]
+
+
+DAG.sort <- DAG[order(as.numeric(DAG6[,8])),]
+plot(DAG.sort[,5], 1:n)
+save(DAG.sort, file="DAG.sort.Rdata")
+write.table(DAG.sort, quote=FALSE, sep="\t", file="DAG.sort")
+"""
