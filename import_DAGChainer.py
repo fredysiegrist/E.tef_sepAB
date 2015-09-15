@@ -95,10 +95,12 @@ Read in all E. tef scaffolds and echos scaffold name and nucleotide sequence
 
 # Search scaffolds on DAGchainer document and build up hash links to the fasta file nucleotide information
 from time import sleep
+missmatch = 0
 for fasta in fasta_sequences:
     try:
         print(' '+fasta.id[3:]+' '+str(D[fasta.id[3:]]))
     except:
-        pass #print(fasta.id[3:]+' '+'Not found.')
+        missmatch=missmatch+1 #print(fasta.id[3:]+' '+'Not found.')
     finally:
          pass #sleep(0.01)
+print('\nNumber of not matched scaffolds: '+str(missmatch))
