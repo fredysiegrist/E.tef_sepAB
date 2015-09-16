@@ -111,5 +111,5 @@ print(histogram(a))
 
 # Now this is amazing how many synthenic stretches we find on a single scaffold,
 # we have to find now the best one (longest-gene stretch on smallest space ?
-
+# Weird that we have stretches with huge differences in coordinates
 
