@@ -78,3 +78,31 @@ def get_seqs(file):
     items.append(aninstance)
 
     return items
+
+
+def find_synthenic_block(coordlist, scafname):
+     # Maximum distance between two matches (-D): plant-default 120000 bp
+     D = 120000
+     entry_old = (0,(0,0),0)
+     genes_in_row = 0
+     synthenic_hits = 0
+     for entry in sorted(coordlist):
+         if(entry_old[0]==0 or entry[0]==entry_old[0]):
+             #print((entry[1][0]-entry_old[1][1])*entry[2]*entry_old[2])
+             if (((entry[1][0]-entry_old[1][1])*entry[2]*entry_old[2])<D):
+                 genes_in_row=genes_in_row+1
+                 if (genes_in_row==1):
+                     if (entry_old[1][0]==0):
+                         cordstart = entry[1][0]
+                     else:
+                         cordstart = entry_old[1][0]
+
+         else:
+             if(genes_in_row>3):
+                 print('got '+str(genes_in_row)+'-genes stretch of synthenic genes on chromosome '+str(entry[0])+' coordinates start: '+str(cordstart)+' end: '+str(entry[1][1])+' on '+scafname)
+                 synthenic_hits=synthenic_hits+1
+             #print('chromosome jump '+str(entry_old[0])+' '+str(entry[0]))
+             genes_in_row = 0
+         entry_old = entry
+     return(synthenic_hits)
+
