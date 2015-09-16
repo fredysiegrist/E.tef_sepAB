@@ -94,7 +94,6 @@ Read in all E. tef scaffolds and echos scaffold name and nucleotide sequence
 
 
 # Search scaffolds on DAGchainer document and build up hash links to the fasta file nucleotide information
-from time import sleep
 from numpy import histogram
 missmatch = 0
 a = []
@@ -105,11 +104,11 @@ for fasta in fasta_sequences:
     except:
         missmatch=missmatch+1 #print(fasta.id[3:]+' '+'Not found.')
     finally:
-         pass #sleep(0.01)
+         pass
 print('\nNumber of not matched scaffolds: '+str(missmatch))
 print(histogram(a))
 
 # Now this is amazing how many synthenic stretches we find on a single scaffold,
 # we have to find now the best one (longest-gene stretch on smallest space ?
-# Weird that we have stretches with huge differences in coordinates
+
 
