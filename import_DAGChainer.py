@@ -107,6 +107,9 @@ for fasta in fasta_sequences:
     finally:
          pass #sleep(0.01)
 print('\nNumber of not matched scaffolds: '+str(missmatch))
-histogram(a);print(a)
+print(histogram(a))
+
+# Now this is amazing how many synthenic stretches we find on a single scaffold,
+# we have to find now the best one (longest-gene stretch on smallest space ?
 
 
