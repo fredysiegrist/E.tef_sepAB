@@ -101,7 +101,7 @@ def find_synthenic_block(coordlist, scafname, D=120000, mingen=3, plot=0):
     # Maximum distance between two matches (-D): plant-default 120000 bp
     #D = 120000
     entry_old = (0, (0, 0), 0)
-    genes_in_row = 0
+    genes_in_row = 1
     synthenic_hits = 0
     cordstart = 0
     found_stretch = []
@@ -110,7 +110,7 @@ def find_synthenic_block(coordlist, scafname, D=120000, mingen=3, plot=0):
             # print(str(entry[1][0])+'-'+str(entry_old[1][1])+'*'+str(entry[2])+'*'+str(entry_old[2])+' '+str(cordstart)+' Decision: '+str(abs((entry[1][0]-entry_old[1][1])*entry[2]*entry_old[2])<=D))
             if (abs((entry[1][0] - entry_old[1][1]) * entry[2] * entry_old[2]) <= D):
                 genes_in_row = genes_in_row + 1
-                if (genes_in_row == 1):
+                if (genes_in_row == 2):
                     if (entry_old[1][0] == 0):
                         cordstart = entry[1][0]
                     else:
@@ -118,11 +118,11 @@ def find_synthenic_block(coordlist, scafname, D=120000, mingen=3, plot=0):
             else:
                 synthenic_hits = __found_synthenic(synthenic_hits, genes_in_row, entry, entry_old, cordstart, scafname, mingen)
                 found_stretch.append(genes_in_row)
-                genes_in_row = 0
+                genes_in_row = 1
         else:
             synthenic_hits = __found_synthenic(synthenic_hits, genes_in_row, entry, entry_old, cordstart, scafname, mingen)
             found_stretch.append(genes_in_row)
-            genes_in_row = 0
+            genes_in_row = 1
             # print('chromosome jump '+str(entry_old[0])+' '+str(entry[0]))
             cordstart = 0
         entry_old = entry
