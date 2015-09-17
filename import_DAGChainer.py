@@ -13,9 +13,10 @@ from tef_functions_FS2015 import *
 try:
     print('Starting test phase:')
     file = open(
-        '../../i1sz/22790_24796.CDS-CDS.last.tdd10.cs0.filtered.dag.all.go',
+        '../../i1sz/22790_24796.CDS-CDS.last.tdd10.cs0.filtered.dag.all.go_D20_g10_A3.aligncoords.gcoords.condensed',
         'r+'
     )
+    print(file.readline())
     print(file.readline())
     print(file.readline())
     file.close()
@@ -32,10 +33,10 @@ finally:
 # Get out the different columns and calculate the difference
 # of the scaffold and reference chromosome coordinates.
 
-lol = list(csv.reader(open(
-    '../../i1sz/22790_24796.CDS-CDS.last.tdd10.cs0.filtered.dag.all.go',
+lol = list(csv.reader(filter(lambda row: row[0]!='#', open(
+    '../../i1sz/22790_24796.CDS-CDS.last.tdd10.cs0.filtered.dag.all.go_D20_g10_A3.aligncoords.gcoords.condensed',
     'r+'
-), delimiter='\t'))
+)), delimiter='\t'))
 for m in lol[1]:
     print(m)
 print('All columns of first line\n\n')
@@ -58,12 +59,13 @@ input('\nPaused --- Press Enter to continue')
 
 D = {}
 for q in range(1, len(lol)):
+    entry = [SynMap(int(str(lol[q][5]).split('||')[0]),int(str(lol[q][5]).split('||')[1]),int(str(lol[q][5]).split('||')[2]),int(str(lol[q][1]).split('||')[4]))]
     if str(lol[q][1]).split('||')[0] in D:
-        D[(str(lol[q][1]).split('||')[0])].extend([(int(str(lol[q][5]).split('||')[0]),(int(str(lol[q][5]).split('||')[1]),int(str(lol[q][5]).split('||')[2])),int(str(lol[q][1]).split('||')[4]))])
+        D[(str(lol[q][1]).split('||')[0])].extend(entry)
     else:
-        D[(str(lol[q][1]).split('||')[0])] = [(int(str(lol[q][5]).split('||')[0]),(int(str(lol[q][5]).split('||')[1]),int(str(lol[q][5]).split('||')[2])),int(str(lol[q][1]).split('||')[4]))]
+        D[(str(lol[q][1]).split('||')[0])] = entry
 
-print(D['scaffold14093'])
+#print(D['scaffold14093'])
 print( "Value : %s" %  D.keys())
 
 
@@ -80,17 +82,8 @@ print('\n\nTest phase over! Starting real life: Раз Два Три\n\n')
 input_file='../../i1sz/GNYt98ter.41.closedgt1000.sorted'
 output_file='../../i1sz/GNY98.pyout'
 fasta_sequences = SeqIO.parse(open(input_file),'fasta')
-"""with open(output_file) as out_file:
-    for fasta in fasta_sequences:
-        #name, sequence = fasta.id, fasta.seq.tostring()
-        #new_sequence = some_function(sequence)
-        #write_fasta(out_file)
-        print(fasta.id+' '+fasta.seq.tostring())"""
 
-"""
-Read in all E. tef scaffolds and echos scaffold name and nucleotide sequence
-
-"""
+# Read in all E. tef scaffolds and echos scaffold name and nucleotide sequence
 
 
 # Search scaffolds on DAGchainer document and build up hash links to the fasta file nucleotide information
@@ -106,7 +99,7 @@ for fasta in fasta_sequences:
     finally:
          pass
 print('\nNumber of not matched scaffolds: '+str(missmatch))
-print(histogram(a, bins=[0,1,2,3,4,5,6,7]))
+print(histogram(a, bins=[0,1,2,3,4,5,10,20,100]))
 
 
 import matplotlib.pyplot as plt
