@@ -77,8 +77,8 @@ print('\n\nTest phase over! Starting real life: Раз Два Три\n\n')
 
 # Here is a code-chunk to easely import fasta files
 
-input_file='/windows/GNY98ter_41.closed'
-output_file='/windows/GNY98.pyout'
+input_file='../../i1sz/GNYt98ter.41.closedgt1000.sorted'
+output_file='../../i1sz/GNY98.pyout'
 fasta_sequences = SeqIO.parse(open(input_file),'fasta')
 """with open(output_file) as out_file:
     for fasta in fasta_sequences:
@@ -99,14 +99,14 @@ missmatch = 0
 a = []
 for fasta in fasta_sequences:
     try:
-        #print(' '+fasta.id[3:]+' '+str(D[fasta.id[3:]]))
-        a.append(find_synthenic_block(D[fasta.id[3:]],str(fasta.id[3:])))
+        #print(' '+fasta.id[3:])#+' '+str(D[fasta.id[3:]]))
+        a.append(find_synthenic_block(D[fasta.id],str(fasta.id)))
     except:
         missmatch=missmatch+1 #print(fasta.id[3:]+' '+'Not found.')
     finally:
          pass
 print('\nNumber of not matched scaffolds: '+str(missmatch))
-print(histogram(a, bins=[0,1,2,3,4,5,6,7,]))
+print(histogram(a, bins=[0,1,2,3,4,5,6,7]))
 
 
 import matplotlib.pyplot as plt

@@ -95,7 +95,7 @@ def get_seqs(file):
     return items
 
 
-def find_synthenic_block(coordlist, scafname, D=120000, mingen=3, plot=1):
+def find_synthenic_block(coordlist, scafname, D=120000, mingen=3, plot=0):
     import matplotlib.pyplot as plt
     # from time import sleep
     # Maximum distance between two matches (-D): plant-default 120000 bp
