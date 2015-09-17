@@ -26,7 +26,7 @@ except FileNotFoundError:
 except Exception:
     print('I give up on you!')
 finally:
-    print('Starting proof of principle:')
+    print('Starting integrity test of input data file:')
 
 
 # Get out the different columns and calculate the difference
@@ -54,7 +54,7 @@ input('\nPaused --- Press Enter to continue')
 ##############################################################################
 
 
-# Build up a hash-table with scaffold name and ( chr, (start, end), orientation )
+# Build up a hash-table with scaffold name and (chr,(start,end),orientation)
 
 D = {}
 for q in range(1, len(lol)):
@@ -106,7 +106,16 @@ for fasta in fasta_sequences:
     finally:
          pass
 print('\nNumber of not matched scaffolds: '+str(missmatch))
-print(histogram(a))
+print(histogram(a, bins=[0,1,2,3,4,5,6,7,]))
+
+
+import matplotlib.pyplot as plt
+plt.hist(a)
+plt.title("Histogram")
+plt.xlabel("3+ genes stretches in scaffold")
+plt.ylabel("Frequency")
+plt.show()
+
 
 # Now this is amazing how many synthenic stretches we find on a single scaffold,
 # we have to find now the best one (longest-gene stretch on smallest space ?
