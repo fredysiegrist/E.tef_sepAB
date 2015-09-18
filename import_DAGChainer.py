@@ -13,7 +13,7 @@ from tef_functions_FS2015 import *
 try:
     print('Starting test phase:')
     file = open(
-        '../../i1sz/22790_24796.CDS-CDS.last.tdd10.cs0.filtered.dag.all.go_D20_g10_A3.aligncoords.gcoords.condensed',
+        '../../i1sz/22790_24796.CDS-CDS.last.tdd10.cs0.filtered.dag.all.go',
         'r+'
     )
     print(file.readline())
@@ -34,7 +34,7 @@ finally:
 # of the scaffold and reference chromosome coordinates.
 
 lol = list(csv.reader(filter(lambda row: row[0]!='#', open(
-    '../../i1sz/22790_24796.CDS-CDS.last.tdd10.cs0.filtered.dag.all.go_D20_g10_A3.aligncoords.gcoords.condensed',
+    '../../i1sz/22790_24796.CDS-CDS.last.tdd10.cs0.filtered.dag.all.go',
     'r+'
 )), delimiter='\t'))
 for m in lol[1]:

@@ -37,6 +37,68 @@ class SynMap:
         (self.chr, self.start, self.end) != (other.chr, other.start, other.end)
 
 
+class DagChain:
+    """
+    We need additional information on nucleotide sequence of chromosome and scaffold
+    for calculation of evolutionary distance with PAML or RSD (on proteins?)
+    """
+    def __init__(self, chr, start, end, ori, scaffold, sstart, send, sori, stretch, number, score):
+        self.chr = chr
+        self.start = start
+        self.end = end
+        self.ori = ori
+        self.coord = (start,end)
+        self.scaffold = scaffold
+        self.sstart = sstart
+        self.send = send
+        self.scoord = (sstart,send)
+        self.sori = sori
+        self.stretch = stretch
+        self.number = number
+        self.score = score
+    def chr(self):
+        return self.chr
+    def start(self):
+        return self.start
+    def end(self):
+        return self.end
+    def ori(self):
+        return self.ori
+    def length(self):
+        return int((self.end-self.start)*self.ori)
+    def chr(self):
+        return self.chr
+    def start(self):
+        return self.start
+    def end(self):
+        return self.end
+    def ori(self):
+        return self.ori
+    def length(self):
+        return int((self.end-self.start)*self.ori)
+    def scaffold(self):
+        return self.scaffold
+    def sstart(self):
+        return self.sstart
+    def send(self):
+        return self.send
+    def sori(self):
+        return self.sori
+    def slength(self):
+        return int((self.send-self.sstart)*self.sori)
+    def stretch(self):
+        return self.stretch
+    def number(self):
+        return self.number
+    def score(self):
+        return self.score
+    def __repr__(self):
+        return repr((self.chr, (self.start, self.end), self.ori))
+    def __lt__(self, other):
+        (self.chr, self.start, self.end, self.sstart, self.ssend) < (other.chr, other.start, other.end, other.sstart, self.send)
+
+
+
 def find_synthenic_block(coordlist, scafname, D=120000, mingen=3, plot=0):
     # from time import sleep
     import matplotlib.pyplot as plt
