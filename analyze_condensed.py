@@ -10,11 +10,11 @@ import matplotlib.pyplot as plt
 
 from tef_functions_FS2015 import *
 
-if pwd.getpwuid(os.getuid()).pw_gecos == 'Фредй' or pwd.getpwuid(
+if pwd.getpwuid(os.getuid()).pw_gecos == 'fredi' or pwd.getpwuid(
         os.getuid()).pw_gecos == 'fsiegris':
     dagfile = '../../i1sz/22790_24796.CDS-CDS.last.tdd10.cs0.filtered.dag.all.go_D20_g10_A3.aligncoords.gcoords.condensed'
 elif pwd.getpwuid(os.getuid()).pw_gecos == 'fredy' or pwd.getpwuid(
-        os.getuid()).pw_gecos == 'cannaroz':
+        os.getuid()).pw_gecos == 'cannarozi':
     dagfile = '../../i1sz/22790_24796.CDS-CDS.last.tdd10.cs0.filtered.dag.all.go_D20_g10_A3.aligncoords.gcoords.condensed'
 else:
     dagfile = input(
@@ -92,11 +92,11 @@ print(D['scaffold105'])
 # print(s.encode(pwd.getpwuid(os.getuid()).pw_gecos))
 
 # Here is a code-chunk to easely import fasta files dependent on current user
-if pwd.getpwuid(os.getuid()).pw_gecos == 'Фредй' or pwd.getpwuid(
+if pwd.getpwuid(os.getuid()).pw_gecos == 'fredi' or pwd.getpwuid(
         os.getuid()).pw_gecos == 'fsiegris':
     input_file = '/windows/GNYt98ter.41.closedgt1000.sorted'
 elif pwd.getpwuid(os.getuid()).pw_gecos == 'fredy' or pwd.getpwuid(
-        os.getuid()).pw_gecos == 'cannaroz':
+        os.getuid()).pw_gecos == 'cannarozi':
     input_file = '../../i1sz/GNYt98ter.41.closedgt1000.sorted'
 else:
     input_file = input(
@@ -114,7 +114,7 @@ missmatch = 0
 a = []
 # OK, I understand I should use english, but I have to violate this rule,
 # from time to time.
-print('\nTest phase over! Starting real thing: Раз Два Три')
+print('\nTest phase over! Starting real thing: One two three')
 input('\nPaused --- Press Enter to continue\n\n')
 for fasta in fasta_sequences:
     try:

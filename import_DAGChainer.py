@@ -78,15 +78,15 @@ input('\nPaused --- Press Enter to continue')
 
 # OK, I understand I should use english, but I have to violate this rule,
 # from time to time.
-print('\n\nTest phase over! Starting real life: Раз Два Три\n\n')
+print('\n\nTest phase over! Starting real life: One Two Tree\n\n')
 
 
 # Here is a code-chunk to easely import fasta files
-if pwd.getpwuid(os.getuid()).pw_gecos == 'Фредй' or pwd.getpwuid(
+if pwd.getpwuid(os.getuid()).pw_gecos == 'fredi' or pwd.getpwuid(
         os.getuid()).pw_gecos == 'fsiegris':
     input_file = '/windows/GNYt98ter.41.closedgt1000.sorted'
 elif pwd.getpwuid(os.getuid()).pw_gecos == 'fredy' or pwd.getpwuid(
-        os.getuid()).pw_gecos == 'cannaroz':
+        os.getuid()).pw_gecos == 'cannarozi':
     input_file = '../../i1sz/GNYt98ter.41.closedgt1000.sorted'
 else:
     input_file = input(
