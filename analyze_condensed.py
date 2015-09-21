@@ -24,7 +24,7 @@ except:
         'Please enter directory and file of *.dag.all.go_D20_g10_A3.aligncoords.gcoords.condensed file')
 lol = list(csv.reader(filter(lambda row: row[0] != '#', open(
     dagfile,
-    'r+'
+    'r'
 )), delimiter='\t'))
 
 comments = list(csv.reader(filter(lambda row: row[0] == '#', open(
