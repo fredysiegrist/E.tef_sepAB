@@ -29,7 +29,7 @@ lol = list(csv.reader(filter(lambda row: row[0] != '#', open(
 
 comments = list(csv.reader(filter(lambda row: row[0] == '#', open(
     dagfile,
-    'r+'
+    'r'
 )), delimiter='\t'))
 
 comment = []
