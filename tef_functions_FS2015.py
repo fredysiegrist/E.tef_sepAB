@@ -162,7 +162,8 @@ def find_synthenic_block(coordlist, fa, D=120000, mingen=3, plot=0):
     for entry in sorted(coordlist, key=attrgetter('chr', 'start', 'end')):
         if (                    # check if on same chromosome
             (entry_old.chr == 0 or (entry.chr == entry_old.chr and
-             entry_old.number == entry.number))):
+             entry_old.number == entry.number and entry_old.score == entry.score))):
+            # !!! Will not work if number and score are the same for different blocks
             # if ((entry.start - entry_old.end)<0):
             if typecheck:
                 orient=(
@@ -186,7 +187,7 @@ def find_synthenic_block(coordlist, fa, D=120000, mingen=3, plot=0):
                         cordstart = entry_old.start
                         if typecheck:
                             scafstart = entry_old.sstart
-            elif (entry != entry_old):
+            elif (entry != entry_old):  # for identical entires in 1st vers.
                 synthenic_hits = __found_synthenic(synthenic_hits,
                                                    genes_in_row, entry,
                                                    entry_old, cordstart,
@@ -195,13 +196,14 @@ def find_synthenic_block(coordlist, fa, D=120000, mingen=3, plot=0):
                 genes_in_row = 1
         else:
             synthenic_hits = __found_synthenic(synthenic_hits, genes_in_row,
-                                               entry, entry_old, cordstart,
+                                               entry_old, entry_ancient, cordstart,
                                                scafname, mingen, fa, scafstart)
             found_stretch.append(genes_in_row)
             genes_in_row = 1
             print('chromosome jump '+str(entry_old[0])+' '+str(entry[0]))
             cordstart = 0
             scafstart = 0
+        entry_ancient = entry_old
         entry_old = entry
     if plot:
         plt.hist(found_stretch)
