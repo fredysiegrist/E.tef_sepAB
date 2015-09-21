@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 
 from tef_functions_FS2015 import *
 
+print(pwd.getpwuid(os.getuid()).pw_gecos)
 if pwd.getpwuid(os.getuid()).pw_gecos == 'fredi' or pwd.getpwuid(
         os.getuid()).pw_gecos == 'fsiegris':
     dagfile = '../../i1sz/22790_24796.CDS-CDS.last.tdd10.cs0.filtered.dag.all.go_D20_g10_A3.aligncoords.gcoords.condensed'
