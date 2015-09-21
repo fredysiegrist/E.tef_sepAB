@@ -16,7 +16,7 @@ if pwd.getpwuid(os.getuid()).pw_gecos == 'fredi' or pwd.getpwuid(
     dagfile = '../../i1sz/22790_24796.CDS-CDS.last.tdd10.cs0.filtered.dag.all.go_D20_g10_A3.aligncoords.gcoords.condensed'
 elif pwd.getpwuid(os.getuid()).pw_gecos == 'Fredy Siegrist,,,' or pwd.getpwuid(
         os.getuid()).pw_gecos == 'Gina Cannarozzi,,,':
-    dagfile = '../../i1sz/22790_24796.CDS-CDS.last.tdd10.cs0.filtered.dag.all.go_D20_g10_A3.aligncoords.gcoords.condensed'
+    dagfile = 'home/fredy/i1sz/22790_24796.CDS-CDS.last.tdd10.cs0.filtered.dag.all.go_D20_g10_A3.aligncoords.gcoords.condensed'
 else:
     dagfile = input(
         'Please enter directory and file of *.dag.all.go_D20_g10_A3.aligncoords.gcoords.condensed file')
@@ -98,7 +98,7 @@ if pwd.getpwuid(os.getuid()).pw_gecos == 'fredi' or pwd.getpwuid(
     input_file = '/windows/GNYt98ter.41.closedgt1000.sorted'
 elif pwd.getpwuid(os.getuid()).pw_gecos == 'Fredy Siegrist,,,' or pwd.getpwuid(
         os.getuid()).pw_gecos == 'Gina Cannarozzi,,,':
-    input_file = '../../i1sz/GNYt98ter.41.closedgt1000.sorted'
+    input_file = '/home/fredy/i1sz/GNYt98ter.41.closedgt1000.sorted'
 else:
     input_file = input(
         'Please enter directory and file of GNYt98ter.41.closedgt1000.sorted file')
