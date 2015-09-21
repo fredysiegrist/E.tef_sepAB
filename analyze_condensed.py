@@ -13,7 +13,7 @@ from tef_functions_FS2015 import *
 try:
     dagfile = sys.argv[1]
 except:
-    if os.getuid() == 1000 or os.getuid() == 1009 or pwd.getpwuid(
+    if os.getuid() == 1000 or pwd.getpwuid(
         os.getuid()).pw_gecos == 'fsiegris':
         dagfile = '../../i1sz/22790_24796.CDS-CDS.last.tdd10.cs0.filtered.dag.all.go_D20_g10_A3.aligncoords.gcoords.condensed'
     elif pwd.getpwuid(os.getuid()).pw_gecos == 'Fredy Siegrist,,,' or pwd.getpwuid(
@@ -98,7 +98,7 @@ print(D['scaffold105'])
 try:
     input_file = sys.argv[2]
 except:
-    if os.getuid() == 1000 or os.getuid() == 1009 or pwd.getpwuid(
+    if os.getuid() == 1000 or pwd.getpwuid(
             os.getuid()).pw_gecos == 'fsiegris':
         input_file = '/windows/GNYt98ter.41.closedgt1000.sorted'
     elif pwd.getpwuid(os.getuid()).pw_gecos == 'Fredy Siegrist,,,' or pwd.getpwuid(
