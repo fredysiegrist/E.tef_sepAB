@@ -14,8 +14,8 @@ print(pwd.getpwuid(os.getuid()).pw_gecos)
 if pwd.getpwuid(os.getuid()).pw_gecos == 'fredi' or pwd.getpwuid(
         os.getuid()).pw_gecos == 'fsiegris':
     dagfile = '../../i1sz/22790_24796.CDS-CDS.last.tdd10.cs0.filtered.dag.all.go_D20_g10_A3.aligncoords.gcoords.condensed'
-elif pwd.getpwuid(os.getuid()).pw_gecos == 'fredy' or pwd.getpwuid(
-        os.getuid()).pw_gecos == 'cannarozi':
+elif pwd.getpwuid(os.getuid()).pw_gecos == 'Fredy Siegrist,,,' or pwd.getpwuid(
+        os.getuid()).pw_gecos == 'Gina Canarozzi,,,':
     dagfile = '../../i1sz/22790_24796.CDS-CDS.last.tdd10.cs0.filtered.dag.all.go_D20_g10_A3.aligncoords.gcoords.condensed'
 else:
     dagfile = input(
@@ -96,8 +96,8 @@ print(D['scaffold105'])
 if pwd.getpwuid(os.getuid()).pw_gecos == 'fredi' or pwd.getpwuid(
         os.getuid()).pw_gecos == 'fsiegris':
     input_file = '/windows/GNYt98ter.41.closedgt1000.sorted'
-elif pwd.getpwuid(os.getuid()).pw_gecos == 'fredy' or pwd.getpwuid(
-        os.getuid()).pw_gecos == 'cannarozi':
+elif pwd.getpwuid(os.getuid()).pw_gecos == 'Fredy Siegrist,,,' or pwd.getpwuid(
+        os.getuid()).pw_gecos == 'Gina Canarozzi,,,':
     input_file = '../../i1sz/GNYt98ter.41.closedgt1000.sorted'
 else:
     input_file = input(

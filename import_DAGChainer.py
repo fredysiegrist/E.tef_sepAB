@@ -85,8 +85,8 @@ print('\n\nTest phase over! Starting real life: One Two Tree\n\n')
 if pwd.getpwuid(os.getuid()).pw_gecos == 'fredi' or pwd.getpwuid(
         os.getuid()).pw_gecos == 'fsiegris':
     input_file = '/windows/GNYt98ter.41.closedgt1000.sorted'
-elif pwd.getpwuid(os.getuid()).pw_gecos == 'fredy' or pwd.getpwuid(
-        os.getuid()).pw_gecos == 'cannarozi':
+elif pwd.getpwuid(os.getuid()).pw_gecos == 'Fredy Siegrist,,,' or pwd.getpwuid(
+        os.getuid()).pw_gecos == 'Gina Canarozzi,,,':
     input_file = '../../i1sz/GNYt98ter.41.closedgt1000.sorted'
 else:
     input_file = input(
