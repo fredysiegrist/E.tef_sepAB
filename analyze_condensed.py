@@ -10,7 +10,8 @@ import matplotlib.pyplot as plt
 
 from tef_functions_FS2015 import *
 
-if pwd.getpwuid(os.getuid()).pw_gecos == 'Фредй':
+if pwd.getpwuid(os.getuid()).pw_gecos == 'Фредй' or pwd.getpwuid(
+        os.getuid()).pw_gecos == 'fsiegris':
     dagfile = '../../i1sz/22790_24796.CDS-CDS.last.tdd10.cs0.filtered.dag.all.go_D20_g10_A3.aligncoords.gcoords.condensed'
 elif pwd.getpwuid(os.getuid()).pw_gecos == 'fredy' or pwd.getpwuid(
         os.getuid()).pw_gecos == 'cannaroz':
@@ -46,37 +47,37 @@ for q in range(0, len(lol)):
     """
     The 'r' entries are extended in reverse order.
     """
-    if str(comment[q][4])=='f':
+    if str(comment[q][4]) == 'f':
         entry = [DagChain(
             int(str(lol[q][5]).split('||')[0]),  # chr
             int(str(lol[q][5]).split('||')[1]),  # start
             int(str(lol[q][5]).split('||')[2]),  # end
-            int(str(lol[q][1]).split('||')[4]),  # ori
+            int(str(lol[q][5]).split('||')[4]),  # ori
             str(lol[q][1]).split('||')[0],  # scaffold
             int(str(lol[q][1]).split('||')[1]),  # sstart
-            int(str(lol[q][5]).split('||')[2]),  # send
-            int(str(lol[q][5]).split('||')[4]),  # sori
+            int(str(lol[q][1]).split('||')[2]),  # send
+            int(str(lol[q][1]).split('||')[4]),  # sori
             int(comment[q][5]),  # stretch
             int(str(comment[q][0])[1]),  # number
             float(comment[q][1])  # score
         )
         ]
-    elif str(comment[q][4])=='r':
-        if q==0 or str(comment[q])!=str(comment[q-1]):   # new block
-            s=int(comment[q][5])-1
+    elif str(comment[q][4]) == 'r':
+        if q == 0 or str(comment[q]) != str(comment[q - 1]):  # new block
+            s = int(comment[q][5]) - 1
         else:
-            s=s-1
+            s = s - 1
         # print(str(s)+'\t'+'\t'.join(comment[q]))
-        r=q+s
+        r = q + s
         entry = [DagChain(
             int(str(lol[r][5]).split('||')[0]),  # chr
             int(str(lol[r][5]).split('||')[1]),  # start
             int(str(lol[r][5]).split('||')[2]),  # end
-            int(str(lol[r][1]).split('||')[4]),  # ori
+            int(str(lol[r][5]).split('||')[4]),  # ori
             str(lol[r][1]).split('||')[0],  # scaffold
             int(str(lol[r][1]).split('||')[1]),  # sstart
-            int(str(lol[r][5]).split('||')[2]),  # send
-            int(str(lol[r][5]).split('||')[4]),  # sori
+            int(str(lol[r][1]).split('||')[2]),  # send
+            int(str(lol[r][1]).split('||')[4]),  # sori
             int(comment[q][5]),  # stretch
             int(str(comment[q][0])[1]),  # number
             float(comment[q][1])  # score
@@ -91,14 +92,15 @@ print(D['scaffold105'])
 # print(s.encode(pwd.getpwuid(os.getuid()).pw_gecos))
 
 # Here is a code-chunk to easely import fasta files dependent on current user
-if pwd.getpwuid(os.getuid()).pw_gecos == 'Фредй':
+if pwd.getpwuid(os.getuid()).pw_gecos == 'Фредй' or pwd.getpwuid(
+        os.getuid()).pw_gecos == 'fsiegris':
     input_file = '/windows/GNYt98ter.41.closedgt1000.sorted'
 elif pwd.getpwuid(os.getuid()).pw_gecos == 'fredy' or pwd.getpwuid(
         os.getuid()).pw_gecos == 'cannaroz':
     input_file = '../../i1sz/GNYt98ter.41.closedgt1000.sorted'
 else:
     input_file = input(
-    'Please enter directory and file of GNYt98ter.41.closedgt1000.sorted file')
+        'Please enter directory and file of GNYt98ter.41.closedgt1000.sorted file')
 
 output_file = '../../i1sz/GNY98.pyout'
 # Read in all E. tef scaffolds and echos scaffold name and nucleotide sequence

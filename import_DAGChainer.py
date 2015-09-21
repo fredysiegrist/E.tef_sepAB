@@ -82,7 +82,8 @@ print('\n\nTest phase over! Starting real life: Раз Два Три\n\n')
 
 
 # Here is a code-chunk to easely import fasta files
-if pwd.getpwuid(os.getuid()).pw_gecos == 'Фредй':
+if pwd.getpwuid(os.getuid()).pw_gecos == 'Фредй' or pwd.getpwuid(
+        os.getuid()).pw_gecos == 'fsiegris':
     input_file = '/windows/GNYt98ter.41.closedgt1000.sorted'
 elif pwd.getpwuid(os.getuid()).pw_gecos == 'fredy' or pwd.getpwuid(
         os.getuid()).pw_gecos == 'cannaroz':
