@@ -6,7 +6,7 @@ __author__ = 'fsiegris'
 import csv, pwd, os, sys
 
 from Bio import SeqIO, SeqFeature
-#import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
 from tef_functions_FS2015 import *
 
@@ -14,14 +14,15 @@ try:
     dagfile = sys.argv[1]
 except:
     if os.getuid() == 1000 or pwd.getpwuid(
-        os.getuid()).pw_gecos == 'fsiegris':
+            os.getuid()).pw_gecos == 'fsiegris':
         dagfile = '../../i1sz/22790_24796.CDS-CDS.last.tdd10.cs0.filtered.dag.all.go_D20_g10_A3.aligncoords.gcoords.condensed'
-    elif pwd.getpwuid(os.getuid()).pw_gecos == 'Fredy Siegrist,,,' or pwd.getpwuid(
-        os.getuid()).pw_gecos == 'Gina Cannarozzi,,,':
+    elif pwd.getpwuid(
+            os.getuid()).pw_gecos == 'Fredy Siegrist,,,' or pwd.getpwuid(
+            os.getuid()).pw_gecos == 'Gina Cannarozzi,,,':
         dagfile = '/home/fredy/i1sz/22790_24796.CDS-CDS.last.tdd10.cs0.filtered.dag.all.go_D20_g10_A3.aligncoords.gcoords.condensed'
     else:
         dagfile = input(
-        'Please enter directory and file of *.dag.all.go_D20_g10_A3.aligncoords.gcoords.condensed file')
+            'Please enter directory and file of *.dag.all.go_D20_g10_A3.aligncoords.gcoords.condensed file')
 lol = list(csv.reader(filter(lambda row: row[0] != '#', open(
     dagfile,
     'r'
@@ -101,7 +102,8 @@ except:
     if os.getuid() == 1000 or pwd.getpwuid(
             os.getuid()).pw_gecos == 'fsiegris':
         input_file = '/windows/GNYt98ter.41.closedgt1000.sorted'
-    elif pwd.getpwuid(os.getuid()).pw_gecos == 'Fredy Siegrist,,,' or pwd.getpwuid(
+    elif pwd.getpwuid(
+            os.getuid()).pw_gecos == 'Fredy Siegrist,,,' or pwd.getpwuid(
             os.getuid()).pw_gecos == 'Gina Cannarozzi,,,':
         input_file = '/home/fredy/i1sz/GNYt98ter.41.closedgt1000.sorted'
     else:
@@ -121,7 +123,7 @@ a = []
 # OK, I understand I should use english, but I have to violate this rule,
 # from time to time.
 print('\nTest phase over! Starting real thing: One two three')
-#input('\nPaused --- Press Enter to continue\n\n')
+# input('\nPaused --- Press Enter to continue\n\n')
 for fasta in fasta_sequences:
     try:
         a.append(find_synthenic_block(D[fasta.id], fasta))

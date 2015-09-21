@@ -1,7 +1,7 @@
 __author__ = 'fsiegris'
 # Date: 07.09.2015
 
-import csv, os, pwd
+import csv, os, pwd, sys
 
 from Bio import SeqIO, SeqFeature
 
@@ -9,25 +9,27 @@ from tef_functions_FS2015 import *
 
 # Test importing the dag file and print out the first
 # significant line.  To run on local and lab computer.
-
 try:
-    print('Starting test phase:')
-    file = open(
-        '../../i1sz/22790_24796.CDS-CDS.last.tdd10.cs0.filtered.dag.all.go',
-        'r+'
-    )
-    print(file.readline())
-    print(file.readline())
-    print(file.readline())
-    file.close()
-except NameError:
-    print('File not readable')
-except FileNotFoundError:
-    print('File not located where it should')
-except Exception:
-    print('I give up on you!')
-finally:
-    print('Starting integrity test of input data file:')
+    dagfile = sys.argv[1]
+except:
+    try:
+        print('Starting test phase:')
+        file = open(
+            '../../i1sz/22790_24796.CDS-CDS.last.tdd10.cs0.filtered.dag.all.go',
+            'r+'
+        )
+        print(file.readline())
+        print(file.readline())
+        print(file.readline())
+        file.close()
+    except NameError:
+        print('File not readable')
+    except FileNotFoundError:
+        print('File not located where it should')
+    except Exception:
+        print('I give up on you!')
+    finally:
+        print('Starting integrity test of input data file:')
 
 
 # Get out the different columns and calculate the difference
@@ -82,15 +84,19 @@ print('\n\nTest phase over! Starting real life: One Two Tree\n\n')
 
 
 # Here is a code-chunk to easely import fasta files
-if pwd.getpwuid(os.getuid()).pw_gecos == 'fredi' or pwd.getpwuid(
-        os.getuid()).pw_gecos == 'fsiegris':
-    input_file = '/windows/GNYt98ter.41.closedgt1000.sorted'
-elif pwd.getpwuid(os.getuid()).pw_gecos == 'Fredy Siegrist,,,' or pwd.getpwuid(
-        os.getuid()).pw_gecos == 'Gina Cannarozzi,,,':
-    input_file = '../../i1sz/GNYt98ter.41.closedgt1000.sorted'
-else:
-    input_file = input(
-        'Please enter directory and file of GNYt98ter.41.closedgt1000.sorted file')
+try:
+    input_file = sys.argv[2]
+except:
+    if os.getuid() == 1000 or pwd.getpwuid(
+            os.getuid()).pw_gecos == 'fsiegris':
+        input_file = '/windows/GNYt98ter.41.closedgt1000.sorted'
+    elif pwd.getpwuid(
+            os.getuid()).pw_gecos == 'Fredy Siegrist,,,' or pwd.getpwuid(
+            os.getuid()).pw_gecos == 'Gina Cannarozzi,,,':
+        input_file = '/home/fredy/i1sz/GNYt98ter.41.closedgt1000.sorted'
+    else:
+        input_file = input(
+            'Please enter directory and file of GNYt98ter.41.closedgt1000.sorted file')
 
 output_file = '../../i1sz/GNY98.pyout'
 fasta_sequences = SeqIO.parse(open(input_file), 'fasta')

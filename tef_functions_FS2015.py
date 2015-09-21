@@ -32,23 +32,23 @@ class SynMap:
 
     def __lt__(self, other):
         (self.chr, self.start, self.end, self.ori) < (
-        other.chr, other.start, other.end, other.ori)
+            other.chr, other.start, other.end, other.ori)
 
     def __le__(self, other):
         (self.chr, self.start, self.end, self.ori) <= (
-        other.chr, other.start, other.end, other.ori)
+            other.chr, other.start, other.end, other.ori)
 
     def __ge__(self, other):
         (self.chr, self.start, self.end, self.ori) >= (
-        other.chr, other.start, other.end, other.ori)
+            other.chr, other.start, other.end, other.ori)
 
     def __gt__(self, other):
         (self.chr, self.start, self.end, self.ori) > (
-        other.chr, other.start, other.end, other.ori)
+            other.chr, other.start, other.end, other.ori)
 
     def __eq__(self, other):
         (self.chr, self.start, self.end, self.ori) == (
-        other.chr, other.start, other.end, other.ori)
+            other.chr, other.start, other.end, other.ori)
 
     def __ne__(self, other):
         (self.chr, self.start, self.end) != (other.chr, other.start, other.end)
@@ -135,7 +135,7 @@ class DagChain:
 
     def __lt__(self, other):
         (self.chr, self.start, self.end, self.sstart, self.ssend) < (
-        other.chr, other.start, other.end, other.sstart, self.send)
+            other.chr, other.start, other.end, other.sstart, self.send)
 
 
 def find_synthenic_block(coordlist, fa, D=120000, mingen=3, plot=0):
@@ -144,13 +144,14 @@ def find_synthenic_block(coordlist, fa, D=120000, mingen=3, plot=0):
 
     from operator import itemgetter, attrgetter, methodcaller
 
-    scafname=str(fa.id)
+    scafname = str(fa.id)
     # Maximum distance between two matches (-D): plant-default 120000 bp
     # D = 120000
-    typecheck = type(coordlist[0])==type(DagChain(0, 0, 0, 0, '', 0, 0, 0, 0, 0, 0))
+    typecheck = type(coordlist[0]) == type(
+        DagChain(0, 0, 0, 0, '', 0, 0, 0, 0, 0, 0))
     if typecheck:
         entry_old = DagChain(0, 0, 0, 0, '', 0, 0, 0, 0, 0, 0)
-    elif type(coordlist[0])==type(SynMap(0, 0, 0, 0)):
+    elif type(coordlist[0]) == type(SynMap(0, 0, 0, 0)):
         entry_old = SynMap(0, 0, 0, 0)
     else:
         print('Wrong list type!')
@@ -160,23 +161,26 @@ def find_synthenic_block(coordlist, fa, D=120000, mingen=3, plot=0):
     scafstart = 0
     found_stretch = []
     for entry in sorted(coordlist, key=attrgetter('chr', 'start', 'end')):
-        if (                    # check if on same chromosome
-            (entry_old.chr == 0 or (entry.chr == entry_old.chr and
-             entry_old.number == entry.number and entry_old.score == entry.score))):
+        if typecheck:
+            chcheck = entry.chr == entry_old.chr and entry_old.number == entry.number and entry_old.score == entry.score
+        else:
+            chcheck = entry.chr == entry_old.chr
+        if (  # check if on same chromosome
+              (entry_old.chr == 0 or (chcheck))):
             # !!! Will not work if number and score are the same for different blocks
             # if ((entry.start - entry_old.end)<0):
             if typecheck:
-                orient=(
-                    entry.ori==entry.sori and entry_old.ori==entry.ori or
-                    entry.ori!=entry.sori and entry_old.ori==entry.ori
+                orient = (
+                    entry.ori == entry.sori and entry_old.ori == entry.ori or
+                    entry.ori != entry.sori and entry_old.ori == entry.ori
                 )
             else:
-                orient=True
-            #    print(' '+str(entry.chr)+' '+str(entry_old.chr)+' \ '+str(entry.start - entry_old.end)+' '+str(entry.coord)+'-'+str(entry_old.coord)+'*'+str(entry.ori)+'*'+str(entry_old.ori)+' '+str(cordstart)+' Decision: '+str((entry.start - entry_old.end) <= D and entry.start > entry_old.start))
+                orient = True
+            # print(' '+str(entry.chr)+' '+str(entry_old.chr)+' \ '+str(entry.start - entry_old.end)+' '+str(entry.coord)+'-'+str(entry_old.coord)+'*'+str(entry.ori)+'*'+str(entry_old.ori)+' '+str(cordstart)+' Decision: '+str((entry.start - entry_old.end) <= D and entry.start > entry_old.start))
             if ((
-                    entry.start - entry_old.end) <= D and
-                    entry.start > entry_old.start and
-                    orient==True):
+                            entry.start - entry_old.end) <= D and
+                        entry.start > entry_old.start and
+                        orient == True):
                 genes_in_row = genes_in_row + 1
                 if (genes_in_row == 2):
                     if (entry_old.start == 0):
@@ -187,20 +191,24 @@ def find_synthenic_block(coordlist, fa, D=120000, mingen=3, plot=0):
                         cordstart = entry_old.start
                         if typecheck:
                             scafstart = entry_old.sstart
+                        else:
+                            scafstart = 0
             elif (entry != entry_old):  # for identical entires in 1st vers.
                 synthenic_hits = __found_synthenic(synthenic_hits,
                                                    genes_in_row, entry,
                                                    entry_old, cordstart,
-                                                   scafname, mingen, fa, scafstart)
+                                                   scafname, mingen, fa,
+                                                   scafstart)
                 found_stretch.append(genes_in_row)
                 genes_in_row = 1
         else:
             synthenic_hits = __found_synthenic(synthenic_hits, genes_in_row,
-                                               entry_old, entry_ancient, cordstart,
+                                               entry_old, entry_ancient,
+                                               cordstart,
                                                scafname, mingen, fa, scafstart)
             found_stretch.append(genes_in_row)
             genes_in_row = 1
-            print('chromosome jump '+str(entry_old[0])+' '+str(entry[0]))
+            # print('chromosome jump '+str(entry_old[0])+' '+str(entry[0]))
             cordstart = 0
             scafstart = 0
         entry_ancient = entry_old
@@ -217,22 +225,24 @@ def find_synthenic_block(coordlist, fa, D=120000, mingen=3, plot=0):
 def __found_synthenic(synthenic_hits, genes_in_row, entry, entry_old,
                       cordstart, scafname, mingen, fa, scafstart):
     try:
-        if entry_old.ori==1:
-            ori='+'
+        if entry_old.ori == 1:
+            ori = '+'
         else:
-            ori='-'
-        if entry_old.sori==1:
-            sori='+'
+            ori = '-'
+        if entry_old.sori == 1:
+            sori = '+'
         else:
-            sori='-'
-        sequ=__get_scaffold_fa(fa, scafstart, entry.send)
-        sequence=sequ[:50]+' ... '+sequ[-50:]
+            sori = '-'
+        sequ = __get_scaffold_fa(fa, scafstart, entry.send)
+        sequence = sequ[:50] + ' ... ' + sequ[-50:]
+        seqcoord = str(scafstart) + ' ' + str(entry.send)
     except:
         if (genes_in_row >= mingen):
             print('Orientation not checked for!')
-        ori=str(entry_old.ori)
-        sori=str(entry.ori)
-        sequence=('NA')
+        ori = str(entry_old.ori)
+        sori = str(entry.ori)
+        sequence = ('NA')
+        seqcoord = (' / NA')
     finally:
         if (genes_in_row >= mingen):
             print('got ' + str(
@@ -240,15 +250,17 @@ def __found_synthenic(synthenic_hits, genes_in_row, entry, entry_old,
                 entry_old.chr) + ' coordinates start: ' + str(
                 cordstart) + ' end: ' + str(
                 entry_old.end) + ' on ' + scafname + ' in ' + sori +
-                ori + ' orientation:\n' + sequence  + str(scafstart) + ' ' + str(entry.send))
+                  ori + ' orientation:\n' + sequence + seqcoord)
             # sleep(1)
             synthenic_hits = synthenic_hits + 1
     return (synthenic_hits)
 
+
 def __get_scaffold_fa(fasta, start, end):
     from Bio import SeqIO, SeqFeature
-    return(str(fasta.seq[start:end]))
+    return (str(fasta.seq[start:end]))
+
 
 def __get_chr_fa(chr, start, end):
     from Bio import SeqIO, SeqFeature
-    return('')
+    return ('')
