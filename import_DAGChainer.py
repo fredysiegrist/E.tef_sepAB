@@ -105,7 +105,7 @@ a = []
 for fasta in fasta_sequences:
     try:
         # print(' '+fasta.id[3:])#+' '+str(D[fasta.id[3:]]))
-        a.append(find_synthenic_block(D[fasta.id], str(fasta.id)))
+        a.append(find_synthenic_block(D[fasta.id], fasta))
     except:
         missmatch = missmatch + 1  # print(fasta.id[3:]+' '+'Not found.')
     finally:

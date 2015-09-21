@@ -116,7 +116,7 @@ print('\nTest phase over! Starting real thing: Раз Два Три')
 input('\nPaused --- Press Enter to continue\n\n')
 for fasta in fasta_sequences:
     try:
-        a.append(find_synthenic_block(D[fasta.id], str(fasta.id)))
+        a.append(find_synthenic_block(D[fasta.id], fasta))
     except:
         missmatch = missmatch + 1
     finally:
