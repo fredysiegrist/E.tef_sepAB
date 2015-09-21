@@ -116,7 +116,7 @@ a = []
 # OK, I understand I should use english, but I have to violate this rule,
 # from time to time.
 print('\nTest phase over! Starting real thing: One two three')
-input('\nPaused --- Press Enter to continue\n\n')
+#input('\nPaused --- Press Enter to continue\n\n')
 for fasta in fasta_sequences:
     try:
         a.append(find_synthenic_block(D[fasta.id], fasta))
