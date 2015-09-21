@@ -98,7 +98,7 @@ print(D['scaffold105'])
 try:
     input_file = sys.argv[2]
 except:
-    if os.getuid() == 1000 or os.getuid() == 1009 pwd.getpwuid(
+    if os.getuid() == 1000 or os.getuid() == 1009 or pwd.getpwuid(
             os.getuid()).pw_gecos == 'fsiegris':
         input_file = '/windows/GNYt98ter.41.closedgt1000.sorted'
     elif pwd.getpwuid(os.getuid()).pw_gecos == 'Fredy Siegrist,,,' or pwd.getpwuid(
