@@ -6,7 +6,7 @@ __author__ = 'fsiegris'
 import csv, pwd, os, sys
 
 from Bio import SeqIO, SeqFeature
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 
 from tef_functions_FS2015 import *
 
@@ -133,8 +133,10 @@ print('\nNumber of not matched scaffolds: ' + str(missmatch))
 print(histogram(a, bins=[0, 1, 2, 3, 4, 5, 10, 20, 100]))
 
 # Plot a histogram of how many stretches have been found on different scaffolds
+"""
 plt.hist(a)
 plt.title("Histogram")
 plt.xlabel("3+ genes stretches in scaffold")
 plt.ylabel("Frequency")
 plt.show()
+"""
