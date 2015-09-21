@@ -3,7 +3,7 @@ __author__ = 'fsiegris'
 # Title -- Analysis functions -for- statistical analyses of tef scaffold matches
 # 'condensed' from CoGe's SynMap on Sorghum chromosomes
 
-import csv, pwd, os
+import csv, pwd, os, sys
 
 from Bio import SeqIO, SeqFeature
 import matplotlib.pyplot as plt
