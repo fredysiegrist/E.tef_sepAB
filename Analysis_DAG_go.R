@@ -20,7 +20,7 @@ if (!file.exists(statdir)){
 
 
 # Adressing the files
-DAG <- read.delim(file="22790_24796.CDS-CDS.last.tdd10.cs0.filtered.dag.all.go", header=FALSE, skip=1, comment.char = "#")
+DAG <- read.delim(file="22790_24796.CDS-CDS.last.tdd10.cs0.filtered.dag.all.go_D20_g10_A3.aligncoords.gcoords.condensed", header=FALSE, skip=1, comment.char = "#")
 head(DAG, 25)
 
 # Number of mapps
@@ -38,6 +38,11 @@ DAG$V5 = factor(DAG$V5,levels(DAG$V5)[c(1,3:10,2)])
 DAG6 <- sapply(DAG$V6, function(n) unlist(strsplit(as.character(n), "||", fixed=TRUE)))
 dim(DAG6) <- c(9, n)
 DAG6 <- t(DAG6)
+
+
+pdf(file=paste(getwd(),"/output/density_map_genes.pdf", sep=""), paper="a4r", width = (2967/150)/2.54, height = (2099/150)/2.54)
+barplot(table(DAG6[,4]), las=2)
+dev.off()
 
 # Trunk to print out one chromosome profile in one pdf file.
 #densChr1 <- apply(DAG6[DAG6[,1]=='1',2:3], 1, function(cord) seq(as.numeric(cord[1]), as.numeric(cord[2])) )

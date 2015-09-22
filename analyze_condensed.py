@@ -6,7 +6,7 @@ __author__ = 'fsiegris'
 import csv, pwd, os, sys
 
 from Bio import SeqIO, SeqFeature
-# import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 
 from tef_functions_FS2015 import *
 
@@ -91,8 +91,8 @@ for q in range(0, len(lol)):
         D[(str(lol[q][1]).split('||')[0])].extend(entry)
     else:
         D[(str(lol[q][1]).split('||')[0])] = entry
-# print(D['scaffold105'])
-
+print(D['scaffold105'])
+input()
 # print(s.encode(pwd.getpwuid(os.getuid()).pw_gecos))
 
 # Here is a code-chunk to easely import fasta files dependent on current user
@@ -135,10 +135,10 @@ print('\nNumber of not matched scaffolds: ' + str(missmatch))
 print(histogram(a, bins=[0, 1, 2, 3, 4, 5, 10, 20, 100]))
 
 # Plot a histogram of how many stretches have been found on different scaffolds
-"""
+
 plt.hist(a)
 plt.title("Histogram")
 plt.xlabel("3+ genes stretches in scaffold")
 plt.ylabel("Frequency")
 plt.show()
-"""
+
