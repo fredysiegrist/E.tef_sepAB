@@ -52,7 +52,7 @@ DAG6 <- t(DAG6)
 chrDensPlot('1', data=DAG6[1:100,])
 
 # Trunk to print out all chromosome profiles in one pdf file.
-pdf(file=paste(getwd(),"/output/density_map_chromosomes.pdf", sep=""), paper="a4r", width = (2967/150)/2.54, height = (2099/150)/2.54)
+pdf(file=paste(getwd(),"/output/density_map_chromosomes_cond.pdf", sep=""), paper="a4r", width = (2967/150)/2.54, height = (2099/150)/2.54)
 par(mfrow=c(2,5))
 for (n in as.character(1:10)) {
     chrDensPlot(n)

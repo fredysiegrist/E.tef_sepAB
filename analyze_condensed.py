@@ -18,7 +18,7 @@ except:
         dagfile = '../../i1sz/22790_24796.CDS-CDS.last.tdd10.cs0.filtered.dag.all.go_D20_g10_A3.aligncoords.gcoords.condensed'
     elif pwd.getpwuid(
             os.getuid()).pw_gecos == 'Fredy Siegrist,,,' or pwd.getpwuid(
-            os.getuid()).pw_gecos == 'Gina Cannarozzi,,,':
+        os.getuid()).pw_gecos == 'Gina Cannarozzi,,,':
         dagfile = '/home/fredy/i1sz/22790_24796.CDS-CDS.last.tdd10.cs0.filtered.dag.all.go_D20_g10_A3.aligncoords.gcoords.condensed'
     else:
         dagfile = input(
@@ -91,7 +91,7 @@ for q in range(0, len(lol)):
         D[(str(lol[q][1]).split('||')[0])].extend(entry)
     else:
         D[(str(lol[q][1]).split('||')[0])] = entry
-print(D['scaffold105'])
+# print(D['scaffold105'])
 
 # print(s.encode(pwd.getpwuid(os.getuid()).pw_gecos))
 
@@ -104,7 +104,7 @@ except:
         input_file = '/windows/GNYt98ter.41.closedgt1000.sorted'
     elif pwd.getpwuid(
             os.getuid()).pw_gecos == 'Fredy Siegrist,,,' or pwd.getpwuid(
-            os.getuid()).pw_gecos == 'Gina Cannarozzi,,,':
+        os.getuid()).pw_gecos == 'Gina Cannarozzi,,,':
         input_file = '/home/fredy/i1sz/GNYt98ter.41.closedgt1000.sorted'
     else:
         input_file = input(
