@@ -138,7 +138,7 @@ class DagChain:
             other.chr, other.start, other.end, other.sstart, self.send)
 
 
-def find_synthenic_block(coordlist, fa, D=12000000, mingen=3, plot=False):
+def find_synthenic_block(coordlist, fa, D=120000, mingen=3, plot=False):
     # from time import sleep
     if plot:
         import matplotlib.pyplot as plt
@@ -211,6 +211,12 @@ def find_synthenic_block(coordlist, fa, D=12000000, mingen=3, plot=False):
                     found_stretch.append(genes_in_row)
                 genes_in_row = 1
         else:
+            synthenic_hits = __found_synthenic(synthenic_hits, genes_in_row,
+                                   entry_old, entry_ancient,
+                                   cordstart,
+                                   scafname, mingen, fa, scafstart)
+            if genes_in_row >= mingen:
+                found_stretch.append(genes_in_row)
             genes_in_row = 1
             # print('chromosome jump '+str(entry_old[0])+' '+str(entry[0]))
             cordstart = 0
@@ -274,13 +280,14 @@ def __get_scaffold_fa(fasta, start, end):
 
 
 def __get_chr_fa(chr, start, end):
+    import os, pwd, sys
     from Bio import SeqIO, SeqFeature
     try:
         input_file = sys.argv[3]
     except:
         if os.getuid() == 1000 or pwd.getpwuid(
                 os.getuid()).pw_gecos == 'fsiegris':
-            input_file = '../../ilsz/Sorghum_bicolor.faa'
+            input_file = '../../i1sz/Sorghum_bicolor.faa'
         elif pwd.getpwuid(
                 os.getuid()).pw_gecos == 'Fredy Siegrist,,,' or pwd.getpwuid(
                 os.getuid()).pw_gecos == 'Gina Cannarozzi,,,':
@@ -289,4 +296,4 @@ def __get_chr_fa(chr, start, end):
             input_file = input(
                 'Please enter directory and file of Sorghum_bicolor.faa file')
     chr_sequences = SeqIO.parse(open(input_file), 'fasta')
-    return ('')
+    return (str(chr_sequences[chr].seq[start:end]))
