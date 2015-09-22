@@ -138,9 +138,10 @@ class DagChain:
             other.chr, other.start, other.end, other.sstart, self.send)
 
 
-def find_synthenic_block(coordlist, fa, D=12000000, mingen=3, plot=False):
+def find_synthenic_block(coordlist, fa, D=120000, mingen=3, plot=False):
     # from time import sleep
-    import matplotlib.pyplot as plt
+    if plot:
+        import matplotlib.pyplot as plt
 
     from operator import itemgetter, attrgetter, methodcaller
 
