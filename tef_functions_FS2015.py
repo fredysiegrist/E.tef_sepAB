@@ -138,7 +138,7 @@ class DagChain:
             other.chr, other.start, other.end, other.sstart, self.send)
 
 
-def find_synthenic_block(coordlist, fa, D=120000, mingen=3, plot=False):
+def find_synthenic_block(coordlist, fa, D=12000000, mingen=3, plot=False):
     # from time import sleep
     import matplotlib.pyplot as plt
 
@@ -155,7 +155,7 @@ def find_synthenic_block(coordlist, fa, D=120000, mingen=3, plot=False):
         entry_old = SynMap(0, 0, 0, 0)
     else:
         print('Wrong list type!')
-    genes_in_row = 0
+    genes_in_row = 1
     synthenic_hits = 0
     cordstart = 0
     scafstart = 0
@@ -174,12 +174,13 @@ def find_synthenic_block(coordlist, fa, D=120000, mingen=3, plot=False):
               (entry_old.chr == 0 or (chcheck))):
             # !!! Will not work if number and score are the same for different blocks
             # if ((entry.start - entry_old.end)<0):
-            if typecheck:
+
+            # You will kill me for the next statement :-)
+            if False: # typecheck:
                 orient = (
                     entry.ori == entry.sori and entry_old.ori == entry.ori or
                     entry.ori != entry.sori and entry_old.ori == entry.ori
                 )
-
             else:
                 orient = True
             # print(' '+str(entry.chr)+' '+str(entry_old.chr)+' \ '+str(entry.start - entry_old.end)+' '+str(entry.coord)+'-'+str(entry_old.coord)+'*'+str(entry.ori)+'*'+str(entry_old.ori)+' '+str(cordstart)+' Decision: '+str((entry.start - entry_old.end) <= D and entry.start > entry_old.start))
@@ -207,9 +208,9 @@ def find_synthenic_block(coordlist, fa, D=120000, mingen=3, plot=False):
                                                    scafstart)
                 if genes_in_row >= mingen:
                     found_stretch.append(genes_in_row)
-                genes_in_row = 0
+                genes_in_row = 1
         else:
-            genes_in_row = 0
+            genes_in_row = 1
             # print('chromosome jump '+str(entry_old[0])+' '+str(entry[0]))
             cordstart = 0
             scafstart = 0
@@ -273,4 +274,18 @@ def __get_scaffold_fa(fasta, start, end):
 
 def __get_chr_fa(chr, start, end):
     from Bio import SeqIO, SeqFeature
+    try:
+        input_file = sys.argv[3]
+    except:
+        if os.getuid() == 1000 or pwd.getpwuid(
+                os.getuid()).pw_gecos == 'fsiegris':
+            input_file = '../../ilsz/Sorghum_bicolor.faa'
+        elif pwd.getpwuid(
+                os.getuid()).pw_gecos == 'Fredy Siegrist,,,' or pwd.getpwuid(
+                os.getuid()).pw_gecos == 'Gina Cannarozzi,,,':
+            input_file = '/home/fredy/i1sz/Sorghum_bicolor.faa'
+        else:
+            input_file = input(
+                'Please enter directory and file of Sorghum_bicolor.faa file')
+    chr_sequences = SeqIO.parse(open(input_file), 'fasta')
     return ('')
