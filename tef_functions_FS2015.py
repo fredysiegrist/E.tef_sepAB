@@ -193,7 +193,7 @@ def find_synthenic_block(coordlist, fa, D=120000, mingen=3, plot=0):
                             scafstart = entry_old.sstart
                         else:
                             scafstart = 0
-            elif (entry != entry_old):  # for identical entires in 1st vers.
+            elif (entry != entry_old):  # for identical entries in 1st vers.
                 synthenic_hits = __found_synthenic(synthenic_hits,
                                                    genes_in_row, entry,
                                                    entry_old, cordstart,
@@ -235,7 +235,7 @@ def __found_synthenic(synthenic_hits, genes_in_row, entry, entry_old,
             sori = '-'
         sequ = __get_scaffold_fa(fa, scafstart, entry.send)
         sequence = sequ[:50] + ' ... ' + sequ[-50:]
-        seqcoord = str(scafstart) + ' ' + str(entry.send)
+        seqcoord = ' ' + str(scafstart) + ' ' + str(entry.send)
     except:
         if (genes_in_row >= mingen):
             print('Orientation not checked for!')
