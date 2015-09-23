@@ -130,12 +130,49 @@ class DagChain:
     def score(self):
         return self.score
 
+    def all(self):
+        return(self.chr, self.start, self.end, self.ori, self.scaffold, self.sstart, self.send, self.scoord, self.sori, self.stretch, self.number, self.score)
+
     def __repr__(self):
         return repr((self.chr, (self.start, self.end), self.ori))
 
     def __lt__(self, other):
         (self.chr, self.start, self.end, self.sstart, self.ssend) < (
             other.chr, other.start, other.end, other.sstart, self.send)
+
+class Stretch(DagChain):
+    """
+    A class for returning the values found for the best (or additional)
+    stretches of genes found on both scaffolds and reference genome
+    (chromosomes).
+    """
+
+    def __init__(self, dag, genes_in_row, block, position):
+        super(Stretch, self).__init__(dag.chr, dag.start, dag.end, dag.ori, dag.scaffold, dag.sstart, dag.send, dag.sori, dag.stretch, dag.number, dag.score)
+        self.genes_in_row = genes_in_row
+        self.block = block
+        self.position = position
+
+    def gir(self):
+        return self.genes_in_row
+
+    def block(self):
+        return self.block
+
+    def position(self):
+        return self.position
+
+    def all(self):
+        return(self.chr, self.start, self.end, self.ori, self.scaffold, self.sstart, self.send, self.scoord, self.sori, self.stretch, self.number, self.score, self.genes_in_row, self.block, self.position)
+
+    def str(self):
+        return('got ' + str(
+                self.genes_in_row) + '-genes stretch of synthenic genes on chromosome ' + str(
+                self.chr) + ' coordinates start: ' + str(self.start) + ' end: ' + str(
+                self.end) + ' on ' + self.scaffold + ' in ' + str(self.sori) +
+                  str(self.ori) + ' orientation:\n' + str(self.coord) + str(self.scoord))
+
+
 
 
 def find_synthenic_block(coordlist, fa, D=12000000, mingen=3, plot=False):
