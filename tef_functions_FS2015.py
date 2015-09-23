@@ -147,11 +147,13 @@ class Stretch(DagChain):
     (chromosomes).
     """
 
-    def __init__(self, dag, genes_in_row, block, position):
+    def __init__(self, dag, genes_in_row, block, position, cfa, sfa):
         super(Stretch, self).__init__(dag.chr, dag.start, dag.end, dag.ori, dag.scaffold, dag.sstart, dag.send, dag.sori, dag.stretch, dag.number, dag.score)
         self.genes_in_row = genes_in_row
         self.block = block
         self.position = position
+        self.cfa = cfa
+        self.sfa = sfa
 
     def gir(self):
         return self.genes_in_row
@@ -163,14 +165,14 @@ class Stretch(DagChain):
         return self.position
 
     def all(self):
-        return(self.chr, self.start, self.end, self.ori, self.scaffold, self.sstart, self.send, self.scoord, self.sori, self.stretch, self.number, self.score, self.genes_in_row, self.block, self.position)
+        return(self.chr, self.start, self.end, self.ori, self.scaffold, self.sstart, self.send, self.scoord, self.sori, self.stretch, self.number, self.score, self.genes_in_row, self.block, self.position, self.cfa, self.sfa)
 
     def str(self):
         return('got ' + str(
                 self.genes_in_row) + '-genes stretch of synthenic genes on chromosome ' + str(
                 self.chr) + ' coordinates start: ' + str(self.start) + ' end: ' + str(
                 self.end) + ' on ' + self.scaffold + ' in ' + str(self.sori) +
-                  str(self.ori) + ' orientation:\n' + str(self.coord) + str(self.scoord))
+                  str(self.ori) + ' orientation:\n' + str(self.cfa) + '   ' + str(self.sfa))
 
 
 
