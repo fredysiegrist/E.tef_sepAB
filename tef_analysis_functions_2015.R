@@ -14,9 +14,13 @@ calcFC=function(lfc){
 
 
 chrDensPlot <- function(chr="1", data=DAG6){
-    densChr.10 <- apply(data[data[,1]==chr,2:3], 1, function(cord) seq(floor(as.numeric(cord[1])/10), floor(as.numeric(cord[2])/10)) )
+    densChr.10 <- apply(data[data[,1]==chr,2:3], 1, function(cord) seq(floor(as.numeric(cord[1])/10), floor(as.numeric(cord[2])/10)))
     print(data[data[,1]==chr,2:3])
     print(length(floor(unlist(densChr.10))))
-    hist(floor(unlist(densChr.10)), freq=TRUE, breaks=diff(range(densChr.10))/10, main=paste("chr.",chr), xlab="10-base occ.")
+    hist(unlist(densChr.10), freq=TRUE, breaks=diff(range(densChr.10))/10, main=paste("chr.",chr), xlab="10-base occ.")
+}
 
+chrDensPlot2 <- function(chr="1", data=DAG6){
+    densChr <- apply(data[data[,1]==chr,2:3], 1, function(cord) seq(as.numeric(cord[1]), as.numeric(cord[2])))
+    hist(unlist(densChr), freq=TRUE, breaks=diff(range(densChr)), main=paste("chr.",chr), xlab="base occ.")
 }

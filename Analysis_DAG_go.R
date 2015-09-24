@@ -39,6 +39,14 @@ DAG6 <- sapply(DAG$V6, function(n) unlist(strsplit(as.character(n), "||", fixed=
 dim(DAG6) <- c(9, n)
 DAG6 <- t(DAG6)
 
+DAG2 <- sapply(DAG$V2, function(n) unlist(strsplit(as.character(n), "||", fixed=TRUE)))
+dim(DAG6) <- c(9, n)
+DAG2 <- t(DAG2)
+
+pdf(file=paste(getwd(),"/output/density_map_Tef_genes.pdf", sep=""), paper="a4r", width = (2967/150)/2.54, height = (2099/150)/2.54)
+barplot(table(DAG2[,4]), las=2)
+dev.off()
+
 
 pdf(file=paste(getwd(),"/output/density_map_genes.pdf", sep=""), paper="a4r", width = (2967/150)/2.54, height = (2099/150)/2.54)
 barplot(table(DAG6[,4]), las=2)
@@ -57,10 +65,10 @@ dev.off()
 chrDensPlot('1', data=DAG6[1:100,])
 
 # Trunk to print out all chromosome profiles in one pdf file.
-pdf(file=paste(getwd(),"/output/density_map_chromosomes_cond.pdf", sep=""), paper="a4r", width = (2967/150)/2.54, height = (2099/150)/2.54)
+pdf(file=paste(getwd(),"/output/density_map_chromosomes_cond2.pdf", sep=""), paper="a4r", width = (2967/150)/2.54, height = (2099/150)/2.54)
 par(mfrow=c(2,5))
 for (n in as.character(1:10)) {
-    chrDensPlot(n)
+    chrDensPlot2(n)
 }
 dev.off()
 

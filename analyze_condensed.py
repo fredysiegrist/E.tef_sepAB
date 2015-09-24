@@ -1,7 +1,7 @@
 __author__ = 'fsiegris'
 # Date -- 18.09.2015
-# Title -- Analysis functions -for- statistical analyses of tef scaffold matches
-# 'condensed' from CoGe's SynMap on Sorghum chromosomes
+# Title -- Analysis functions -for- statistical analyses of tef scaffold
+# matches 'condensed' from CoGe's SynMap on Sorghum chromosomes
 
 import csv, pwd, os, sys
 
@@ -22,7 +22,8 @@ except:
         dagfile = '/home/fredy/i1sz/22790_24796.CDS-CDS.last.tdd10.cs0.filtered.dag.all.go_D20_g10_A3.aligncoords.gcoords.condensed'
     else:
         dagfile = input(
-            'Please enter directory and file of *.dag.all.go_D20_g10_A3.aligncoords.gcoords.condensed file')
+            'Please enter directory and file of \
+            *.dag.all.go_D20_g10_A3.aligncoords.gcoords.condensed file')
 lol = list(csv.reader(filter(lambda row: row[0] != '#', open(
     dagfile,
     'r'
@@ -91,8 +92,8 @@ for q in range(0, len(lol)):
         D[(str(lol[q][1]).split('||')[0])].extend(entry)
     else:
         D[(str(lol[q][1]).split('||')[0])] = entry
-print(D['scaffold105'])
-input()
+#print(D['scaffold105'])
+#input()
 # print(s.encode(pwd.getpwuid(os.getuid()).pw_gecos))
 
 # Here is a code-chunk to easely import fasta files dependent on current user
@@ -108,11 +109,30 @@ except:
         input_file = '/home/fredy/i1sz/GNYt98ter.41.closedgt1000.sorted'
     else:
         input_file = input(
-            'Please enter directory and file of GNYt98ter.41.closedgt1000.sorted file')
+    'Please enter directory and file of GNYt98ter.41.closedgt1000.sorted file')
 
 output_file = '../../i1sz/GNY98.pyout'
 # Read in all E. tef scaffolds and echos scaffold name and nucleotide sequence
 fasta_sequences = SeqIO.parse(open(input_file), 'fasta')
+
+# Read in all Sorghum chromosomes and sort chromosomes by number
+try:
+    input_file = sys.argv[3]
+except:
+    if os.getuid() == 1000 or pwd.getpwuid(
+            os.getuid()).pw_gecos == 'fsiegris':
+        input_file = '../../i1sz/Sorghum_bicolor.faa'
+    elif pwd.getpwuid(
+            os.getuid()).pw_gecos == 'Fredy Siegrist,,,' or pwd.getpwuid(
+            os.getuid()).pw_gecos == 'Gina Cannarozzi,,,':
+        input_file = '/home/fredy/i1sz/Sorghum_bicolor.faa'
+    else:
+        input_file = input(
+            'Please enter directory and file of Sorghum_bicolor.faa file')
+chr_sequences = SeqIO.parse(open(input_file), 'fasta')
+
+chr_sequences = list(sorted(chr_sequences, key=lambda x: int(x.id[3:])))
+
 
 # Search scaffolds on DAGchainer document and build up hash links
 # to the fasta file nucleotide information
@@ -120,17 +140,15 @@ from numpy import histogram
 
 missmatch = 0
 a = []
-# OK, I understand I should use english, but I have to violate this rule,
-# from time to time.
+
 print('\nTest phase over! Starting real thing: One two three')
-# input('\nPaused --- Press Enter to continue\n\n')
+
 for fasta in fasta_sequences:
     try:
-        a.append(find_synthenic_block(D[fasta.id], fasta))
-    except:
+        a.append(find_synthenic_block(D[fasta.id], fasta, chr_sequences))
+    except KeyError:
         missmatch = missmatch + 1
-    finally:
-        pass
+
 print('\nNumber of not matched scaffolds: ' + str(missmatch))
 print(histogram(a, bins=[0, 1, 2, 3, 4, 5, 10, 20, 100]))
 
