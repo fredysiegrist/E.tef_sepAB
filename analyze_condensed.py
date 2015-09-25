@@ -64,14 +64,15 @@ for q in range(0, len(lol)):
             int(str(lol[q][1]).split('||')[4]),  # sori
             int(comment[q][5]),  # stretch
             int(str(comment[q][0])[1]),  # number
-            float(comment[q][1])  # score
+            float(comment[q][1]),  # score
+            str(comment[q][4]) # reversion
         )
         ]
     elif str(comment[q][4]) == 'r':
         if q == 0 or str(comment[q]) != str(comment[q - 1]):  # new block
             s = int(comment[q][5]) - 1
         else:
-            s = s - 1
+            s = s - 2
         # print(str(s)+'\t'+'\t'.join(comment[q]))
         r = q + s
         entry = [DagChain(
@@ -85,7 +86,8 @@ for q in range(0, len(lol)):
             int(str(lol[r][1]).split('||')[4]),  # sori
             int(comment[q][5]),  # stretch
             int(str(comment[q][0])[1]),  # number
-            float(comment[q][1])  # score
+            float(comment[q][1]),  # score
+            str(comment[q][4]) # reversion
         )
         ]
     if str(lol[q][1]).split('||')[0] in D:
@@ -130,7 +132,7 @@ except:
         input_file = input(
             'Please enter directory and file of Sorghum_bicolor.faa file')
 chr_sequences = SeqIO.parse(open(input_file), 'fasta')
-
+# Sort the cromosomes numerically.
 chr_sequences = list(sorted(chr_sequences, key=lambda x: int(x.id[3:])))
 
 
@@ -146,7 +148,7 @@ print('\nTest phase over! Starting real thing: One two three')
 for fasta in fasta_sequences:
     try:
         a.append(find_synthenic_block(D[fasta.id], fasta, chr_sequences))
-    except KeyError:
+    except KeyError:   # Only except for missing keys!
         missmatch = missmatch + 1
 
 print('\nNumber of not matched scaffolds: ' + str(missmatch))

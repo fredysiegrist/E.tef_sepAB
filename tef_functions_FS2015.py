@@ -61,7 +61,7 @@ class DagChain:
     """
 
     def __init__(self, chr, start, end, ori, scaffold, sstart, send, sori,
-                 stretch, number, score):
+                 stretch, number, score, reversion):
         self.chr = chr
         self.start = start
         self.end = end
@@ -75,6 +75,7 @@ class DagChain:
         self.stretch = stretch
         self.number = number
         self.score = score
+        self.reversion = reversion
 
     def chr(self):
         return self.chr
@@ -130,6 +131,9 @@ class DagChain:
     def score(self):
         return self.score
 
+    def reversion(self):
+        return self.reversion
+
     def all(self):
         return (
             self.chr, self.start, self.end, self.ori, self.scaffold,
@@ -156,7 +160,7 @@ class Stretch(DagChain):
         super(Stretch, self).__init__(dag.chr, dag.start, dag.end, dag.ori,
                                       dag.scaffold, dag.sstart, dag.send,
                                       dag.sori, dag.stretch, dag.number,
-                                      dag.score)
+                                      dag.score, dag.reversion)
         self.genes_in_row = genes_in_row
         self.block = block
         self.position = position
@@ -202,33 +206,36 @@ class Stretch(DagChain):
             other.send - other.sstart, other.coord, other.scoord)
 
 
-def find_synthenic_block(coordlist, fa, chfa, D=120000, mingen=3, plot=False):
+def find_synthenic_block(coordlist, fa, chfa, D=1200000, mingen=3, plot=False):
+    """
+    Maximum distance between two matches (-D): plant-default 120000 bp
+    D = 120000
+    """
     if plot:
         import matplotlib.pyplot as plt
 
-    from operator import itemgetter, attrgetter, methodcaller
+    from operator import attrgetter
 
     scafname = str(fa.id)
-    # Maximum distance between two matches (-D): plant-default 120000 bp
-    # D = 120000
     typecheck = type(coordlist[0]) == type(
-        DagChain(0, 0, 0, 0, '', 0, 0, 0, 0, 0, 0))
+        DagChain(0, 0, 0, 0, '', 0, 0, 0, 0, 0, 0, 'f'))
     if typecheck:
-        entry_old = DagChain(0, 0, 0, 0, '', 0, 0, 0, 0, 0, 0)
+        entry_old = DagChain(0, 0, 0, 0, '', 0, 0, 0, 0, 0, 0, 'f')
     elif type(coordlist[0]) == type(SynMap(0, 0, 0, 0)):
         entry_old = SynMap(0, 0, 0, 0)
     else:
         print('Wrong list type!')
-    block = 0
+    block = 1
     genes_in_row = 1
     synthenic_hits = []
     cordstart = 0
     scafstart = 0
     found_stretch = []
     ecount = 0
-    if not typecheck:
-        coordlist = sorted(coordlist, key=attrgetter('chr', 'start', 'end'))
+    #if not typecheck:
+    #coordlist = sorted(coordlist, key=attrgetter('chr', 'start', 'end'))
     for entry in coordlist:
+        #print(entry)
         ecount = ecount + 1
         if typecheck:
             # print(str(entry.chr == entry_old.chr) + str(entry_old.number ==
@@ -240,31 +247,24 @@ def find_synthenic_block(coordlist, fa, chfa, D=120000, mingen=3, plot=False):
               (entry_old.chr == 0 or (chcheck))):
             # !!! Will not work if number and score are the same for
             # different blocks;
-            # if ((entry.start - entry_old.end)<0):
-            block = block + 1
-            # You will kill me for the next statement :-)
-            if False:  # typecheck:
-                orient = (
-                    entry.ori == entry.sori and entry_old.ori == entry.ori or
-                    entry.ori != entry.sori and entry_old.ori == entry.ori
-                )
-            else:
-                orient = True
+            orient = True
             # print(' '+str(entry.chr)+' '+str(entry_old.chr)+' \ '+
             # str(entry.start - entry_old.end)+' '+str(entry.coord)+'-'+
             # str(entry_old.coord)+'*'+str(entry.ori)+'*'+str(entry_old.ori)
             # +' '+str(cordstart)+' Decision: '+str((entry.start -
             # entry_old.end) <= D and entry.start > entry_old.start))
             if (
-                            abs(entry.start - entry_old.end) <= D and
-                    # entry.start > entry_old.start and
-                            orient == True):
+                abs(entry.start - entry_old.end) <= D and
+                orient == True):
                 genes_in_row = genes_in_row + 1
                 if (genes_in_row == 2):
                     if (entry_old.start == 0):
                         cordstart = entry.start
                         if typecheck:
-                            scafstart = entry.sstart
+                            if entry.reversion=='f':
+                                scafstart = entry.sstart
+                            else:
+                                scafstart = entry.send
                     else:
                         cordstart = entry_old.start
                         if typecheck:
@@ -274,9 +274,10 @@ def find_synthenic_block(coordlist, fa, chfa, D=120000, mingen=3, plot=False):
             elif (entry != entry_old):  # for identical entries in 1st vers.
                 synthenic_hits = __found_synthenic(synthenic_hits,
                                                    genes_in_row, entry,
-                                                   entry_old, cordstart,
+                                                   cordstart,
                                                    scafname, mingen, fa,
                                                    scafstart, block, chfa)
+                #print("GATE2 " + str(entry.sori))
                 if genes_in_row >= mingen:
                     found_stretch.append(genes_in_row)
                 genes_in_row = 1
@@ -284,25 +285,25 @@ def find_synthenic_block(coordlist, fa, chfa, D=120000, mingen=3, plot=False):
                 scafstart = 0
         else:
             synthenic_hits = __found_synthenic(synthenic_hits, genes_in_row,
-                                               entry_old, entry_ancient,
-                                               cordstart,
+                                               entry_old, cordstart,
                                                scafname, mingen, fa, scafstart,
                                                block, chfa)
+            #print("GATE3 " + str(entry.sori))
             if genes_in_row >= mingen:
                 found_stretch.append(genes_in_row)
             genes_in_row = 1
             # print('chromosome jump '+str(entry_old[0])+' '+str(entry[0]))
             cordstart = 0
             scafstart = 0
+            block = block + 1
         if ecount == len(coordlist):
             synthenic_hits = __found_synthenic(synthenic_hits, genes_in_row,
-                                               entry_old, entry_ancient,
-                                               cordstart,
+                                               entry, cordstart,
                                                scafname, mingen, fa, scafstart,
                                                block, chfa)
+            #print("GATE1 " + str(entry.sori))
             if genes_in_row >= mingen:
                 found_stretch.append(genes_in_row)
-        entry_ancient = entry_old
         entry_old = entry
     print(__decide_best_stretch(synthenic_hits))
     if plot:
@@ -314,45 +315,56 @@ def find_synthenic_block(coordlist, fa, chfa, D=120000, mingen=3, plot=False):
     return (len(found_stretch))
 
 
-def __found_synthenic(synthenic_hits, genes_in_row, entry, entry_old,
+def __found_synthenic(synthenic_hits, genes_in_row, entry,
                       cordstart, scafname, mingen, fa, scafstart, block, chfa):
     try:
-        if entry_old.ori == 1:
+        if entry.ori == 1:
             ori = '+'
         else:
             ori = '-'
-        if entry_old.sori == 1:
+        if entry.sori == 1:
             sori = '+'
         else:
             sori = '-'
-        sequ = __get_scaffold_fa(fa, scafstart, entry_old.send)
-        chseq = __get_chr_fa(chfa, entry_old.chr, entry_old.start,
-                             entry_old.end)
+        if cordstart > entry.start:
+            end = cordstart
+            cordstart = entry.end
+        else:
+            end = entry.end
+        if scafstart > entry.sstart:
+            send = scafstart
+            scafstart = entry.send
+        else:
+            send = entry.send
+        sequ = __get_scaffold_fa(fa, scafstart, send)
+        chseq = __get_chr_fa(chfa, entry.chr, cordstart, end)
         sequence = sequ[:50] + ' ... ' + sequ[-50:]
-        seqcoord = ' ' + str(scafstart) + ' ' + str(entry.send)
+        seqcoord = ' ' + str(scafstart) + ' ' + str(send)
     except:
         if (genes_in_row >= mingen):
             print('Orientation not checked for!')
-        ori = str(entry_old.ori)
+        ori = str(entry.ori)
         sori = str(entry.ori)
         chseq = 'NA'
         sequence = 'NA'
         seqcoord = ' / NA'
     finally:
         if (genes_in_row >= mingen):
-            """print('got ' + str(
+            """
+            print('got ' + str(
                 genes_in_row) +
                   '-genes stretch of synthenic genes on chromosome ' + str(
-                entry_old.chr) + ' coordinates start: ' + str(
+                entry.chr) + ' coordinates start: ' + str(
                 cordstart) + ' end: ' + str(
-                entry_old.end) + ' on ' + scafname + ' in ' + sori +
-                  ori + ' orientation:\n' + sequence + seqcoord + ' '+ str(block))"""
+                entry.end) + ' on ' + scafname + ' in ' + sori +
+                  ori + ' orientation:\n' + sequence + seqcoord + ' '+ str(block))
+            """
             goodstretch = Stretch(
-                DagChain(entry_old.chr, cordstart, entry_old.end,
-                         entry_old.ori, scafname, scafstart,
-                         entry_old.send, entry_old.sori,
-                         entry_old.stretch, entry_old.number,
-                         entry_old.score), genes_in_row, block, 0,
+                DagChain(entry.chr, cordstart, end,
+                         entry.ori, scafname, scafstart,
+                         send, entry.sori,
+                         entry.stretch, entry.number,
+                         entry.score, entry.reversion), genes_in_row, block, 0,
                 chseq, sequ)
             synthenic_hits.append(goodstretch)
     return synthenic_hits

@@ -131,3 +131,35 @@ fasta_sequences = SeqIO.parse(open(input_file),'fasta')
 
 for fasta in fasta_sequences:
     find_synthenic_block(D[fasta.id],str(fasta.id))
+
+
+
+
+
+
+
+                genes_in_row = genes_in_row + 1
+                if (genes_in_row == 2):
+                    if (entry_old.start == 0):
+                        cordstart = entry.start
+                        if typecheck:
+                            scafstart = entry.sstart
+                    else:
+                        cordstart = entry_old.start
+                        if typecheck:
+                            scafstart = entry_old.sstart
+                        else:
+                            scafstart = 0
+
+
+
+
+
+            # if ((entry.start - entry_old.end)<0):
+            # You will kill me for the next statement :-)
+            if False:  # typecheck:
+                orient = (
+                    entry.ori == entry.sori and entry_old.ori == entry.ori or
+                    entry.ori != entry.sori and entry_old.ori == entry.ori
+                )
+            else:
