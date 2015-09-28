@@ -61,7 +61,7 @@ class DagChain:
     """
 
     def __init__(self, chr, start, end, ori, scaffold, sstart, send, sori,
-                 stretch, number, score, reversion):
+                 stretch, number, score, reversion, block):
         self.chr = chr
         self.start = start
         self.end = end
@@ -76,6 +76,7 @@ class DagChain:
         self.number = number
         self.score = score
         self.reversion = reversion
+        self.block = block
 
     def chr(self):
         return self.chr
@@ -134,12 +135,15 @@ class DagChain:
     def reversion(self):
         return self.reversion
 
+    def block(self):
+        return self.block
+
     def all(self):
         return (
             self.chr, self.start, self.end, self.ori, self.scaffold,
             self.sstart,
             self.send, self.scoord, self.sori, self.stretch, self.number,
-            self.score)
+            self.score, self.block)
 
     def __repr__(self):
         return repr((self.chr, (self.start, self.end), self.ori))
@@ -156,13 +160,13 @@ class Stretch(DagChain):
     (chromosomes).
     """
 
-    def __init__(self, dag, genes_in_row, block, position, cfa, sfa):
+    def __init__(self, dag, genes_in_row, newblock, position, cfa, sfa):
         super(Stretch, self).__init__(dag.chr, dag.start, dag.end, dag.ori,
                                       dag.scaffold, dag.sstart, dag.send,
                                       dag.sori, dag.stretch, dag.number,
-                                      dag.score, dag.reversion)
+                                      dag.score, dag.reversion, dag.block)
         self.genes_in_row = genes_in_row
-        self.block = block
+        self.newblock = newblock
         self.position = position
         self.cfa = cfa
         self.sfa = sfa
@@ -172,8 +176,11 @@ class Stretch(DagChain):
     def gir(self):
         return self.genes_in_row
 
-    def block(self):
-        return self.block
+    def genes_in_row(self):
+        return self.genes_in_row
+
+    def newblock(self):
+        return self.newblock
 
     def position(self):
         return self.position
@@ -183,7 +190,7 @@ class Stretch(DagChain):
             self.chr, self.start, self.end, self.ori, self.scaffold,
             self.sstart,
             self.send, self.sori, self.stretch, self.number, self.score,
-            self.genes_in_row, self.block, self.position, self.cfa, self.sfa)
+            self.genes_in_row, self.newblock, self.position, self.cfa, self.sfa)
 
     def __repr__(self):
         return repr((self.position, self.block, self.genes_in_row, self.score,
@@ -208,7 +215,7 @@ class Stretch(DagChain):
             other.send - other.sstart, other.coord, other.scoord)
 
 
-def find_synthenic_block(coordlist, fa, chfa, D=1200000, mingen=3, plot=False):
+def find_synthenic_block(coordlist, fa, chfa, D=120000, mingen=3, plot=False):
     """
     Maximum distance between two matches (-D): plant-default 120000 bp
     D = 120000
@@ -220,9 +227,9 @@ def find_synthenic_block(coordlist, fa, chfa, D=1200000, mingen=3, plot=False):
 
     scafname = str(fa.id)
     typecheck = type(coordlist[0]) == type(
-        DagChain(0, 0, 0, 0, '', 0, 0, 0, 0, 0, 0, 'f'))
+        DagChain(0, 0, 0, 0, '', 0, 0, 0, 0, 0, 0, 'f', 0))
     if typecheck:
-        entry_old = DagChain(0, 0, 0, 0, '', 0, 0, 0, 0, 0, 0, 'f')
+        entry_old = DagChain(0, 0, 0, 0, '', 0, 0, 0, 0, 0, 0, 'f', 0)
     elif type(coordlist[0]) == type(SynMap(0, 0, 0, 0)):
         entry_old = SynMap(0, 0, 0, 0)
     else:
@@ -273,7 +280,7 @@ def find_synthenic_block(coordlist, fa, chfa, D=1200000, mingen=3, plot=False):
                             scafstart = entry_old.sstart
                         else:
                             scafstart = 0
-            elif (entry != entry_old):  # for identical entries in 1st vers.
+            elif (entry != entry_old or entry.block != entry_old.block):  # for identical entries in 1st vers.
                 synthenic_hits = __found_synthenic(synthenic_hits,
                                                    genes_in_row, entry,
                                                    cordstart,
@@ -339,16 +346,16 @@ def __found_synthenic(synthenic_hits, genes_in_row, entry,
             send = entry.send
         sequ = __get_scaffold_fa(fa, scafstart, send)
         chseq = __get_chr_fa(chfa, entry.chr, cordstart, end)
-        sequence = sequ[:50] + ' ... ' + sequ[-50:]
-        seqcoord = ' ' + str(scafstart) + ' ' + str(send)
+        #sequence = sequ[:50] + ' ... ' + sequ[-50:]
+        #seqcoord = ' ' + str(scafstart) + ' ' + str(send)
     except:
         if (genes_in_row >= mingen):
             print('Orientation not checked for!')
-        ori = str(entry.ori)
-        sori = str(entry.ori)
+        #ori = str(entry.ori)
+        #sori = str(entry.ori)
         chseq = 'NA'
-        sequence = 'NA'
-        seqcoord = ' / NA'
+        #sequence = 'NA'
+        #seqcoord = ' / NA'
     finally:
         if (genes_in_row >= mingen):
             """
@@ -365,7 +372,7 @@ def __found_synthenic(synthenic_hits, genes_in_row, entry,
                          entry.ori, scafname, scafstart,
                          send, entry.sori,
                          entry.stretch, entry.number,
-                         entry.score, entry.reversion), genes_in_row, block, 0,
+                         entry.score, entry.reversion, entry.block), genes_in_row, block, 0,
                 chseq, sequ)
             synthenic_hits.append(goodstretch)
     return synthenic_hits

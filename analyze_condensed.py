@@ -35,13 +35,16 @@ comments = list(csv.reader(filter(lambda row: row[0] == '#', open(
 )), delimiter='\t'))
 
 comment = []
-
+block = 1
 for m in comments:
+    block = block + 1
+    m.append(block)
     try:
         for n in range(0, int(m[5])):
-            # print(m)
             comment.append(m)
-    except:
+    except IndentationError:
+        pass    # empty comment first line
+    except IndexError:
         pass
 
 # print(str(len(comment))+' '+str(len(comments))+' '+str(len(lol)))
@@ -65,7 +68,8 @@ for q in range(0, len(lol)):
             int(comment[q][5]),  # stretch
             int(str(comment[q][0])[1]),  # number
             float(comment[q][1]),  # score
-            str(comment[q][4])  # reversion
+            str(comment[q][4]),  # reversion
+            int(comment[q][6]) # block
         )
         ]
     elif str(comment[q][4]) == 'r':
@@ -87,7 +91,8 @@ for q in range(0, len(lol)):
             int(comment[q][5]),  # stretch
             int(str(comment[q][0])[1]),  # number
             float(comment[q][1]),  # score
-            str(comment[q][4])  # reversion
+            str(comment[q][4]),  # reversion
+            int(comment[q][6]) # block
         )
         ]
     if str(lol[q][1]).split('||')[0] in D:
@@ -158,7 +163,7 @@ print('\nNumber of not matched scaffolds: ' + str(missmatch))
 print(histogram(a, bins=[0, 1, 2, 3, 4, 5, 10, 20, 100]))
 
 # Save Stretch-list in a file for R import.
-output_file = '../../i1sz/stretches_output.csv'
+output_file = '../../i1sz/stretches_condensed.csv'
 try:
     with open(output_file, 'w') as csvfile:
         stretchwriter = csv.writer(csvfile, delimiter='\t',
@@ -172,8 +177,8 @@ try:
                          str(entry.sori), str(entry.stretch),
                          str(entry.number),
                          str(entry.score), str(entry.reversion),
-                         str(entry.gir), str(entry.block), str(entry.position),
-                         str(entry.cfa), str(entry.sfa)]
+                         str(entry.genes_in_row), str(entry.block), str(entry.position)]#,
+                         #str(entry.cfa), str(entry.sfa)]
                 stretchwriter.writerow(stret)
                 # stretchwriter.writerow("\# "+str(entry[0].scafname))
 except FileNotFoundError:
