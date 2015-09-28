@@ -186,8 +186,10 @@ class Stretch(DagChain):
             self.genes_in_row, self.block, self.position, self.cfa, self.sfa)
 
     def __repr__(self):
-        return repr((self.position, self.block, self.genes_in_row, self.score, self.len,
-                    self.slen, self.chr, self.coord, self.scaffold, self.scoord))
+        return repr((self.position, self.block, self.genes_in_row, self.score,
+                     self.len,
+                     self.slen, self.chr, self.coord, self.scaffold,
+                     self.scoord))
 
     def str(self):
         return ('got ' + str(
@@ -232,10 +234,10 @@ def find_synthenic_block(coordlist, fa, chfa, D=1200000, mingen=3, plot=False):
     scafstart = 0
     found_stretch = []
     ecount = 0
-    #if not typecheck:
-    #coordlist = sorted(coordlist, key=attrgetter('chr', 'start', 'end'))
+    # if not typecheck:
+    # coordlist = sorted(coordlist, key=attrgetter('chr', 'start', 'end'))
     for entry in coordlist:
-        #print(entry)
+        # print(entry)
         ecount = ecount + 1
         if typecheck:
             # print(str(entry.chr == entry_old.chr) + str(entry_old.number ==
@@ -254,14 +256,14 @@ def find_synthenic_block(coordlist, fa, chfa, D=1200000, mingen=3, plot=False):
             # +' '+str(cordstart)+' Decision: '+str((entry.start -
             # entry_old.end) <= D and entry.start > entry_old.start))
             if (
-                abs(entry.start - entry_old.end) <= D and
-                orient == True):
+                            abs(entry.start - entry_old.end) <= D and
+                            orient == True):
                 genes_in_row = genes_in_row + 1
                 if (genes_in_row == 2):
                     if (entry_old.start == 0):
                         cordstart = entry.start
                         if typecheck:
-                            if entry.reversion=='f':
+                            if entry.reversion == 'f':
                                 scafstart = entry.sstart
                             else:
                                 scafstart = entry.send
@@ -277,7 +279,7 @@ def find_synthenic_block(coordlist, fa, chfa, D=1200000, mingen=3, plot=False):
                                                    cordstart,
                                                    scafname, mingen, fa,
                                                    scafstart, block, chfa)
-                #print("GATE2 " + str(entry.sori))
+                # print("GATE2 " + str(entry.sori))
                 if genes_in_row >= mingen:
                     found_stretch.append(genes_in_row)
                 genes_in_row = 1
@@ -288,7 +290,7 @@ def find_synthenic_block(coordlist, fa, chfa, D=1200000, mingen=3, plot=False):
                                                entry_old, cordstart,
                                                scafname, mingen, fa, scafstart,
                                                block, chfa)
-            #print("GATE3 " + str(entry.sori))
+            # print("GATE3 " + str(entry.sori))
             if genes_in_row >= mingen:
                 found_stretch.append(genes_in_row)
             genes_in_row = 1
@@ -301,18 +303,17 @@ def find_synthenic_block(coordlist, fa, chfa, D=1200000, mingen=3, plot=False):
                                                entry, cordstart,
                                                scafname, mingen, fa, scafstart,
                                                block, chfa)
-            #print("GATE1 " + str(entry.sori))
+            # print("GATE1 " + str(entry.sori))
             if genes_in_row >= mingen:
                 found_stretch.append(genes_in_row)
         entry_old = entry
-    print(__decide_best_stretch(synthenic_hits))
     if plot:
         plt.hist(found_stretch)
         plt.title("Histogram of " + scafname)
         plt.xlabel("genes in row on 3+stretches")
         plt.ylabel("Frequency")
         plt.show()
-    return (len(found_stretch))
+    return (__decide_best_stretch(synthenic_hits), len(found_stretch))
 
 
 def __found_synthenic(synthenic_hits, genes_in_row, entry,
@@ -383,8 +384,10 @@ def __decide_best_stretch(listofstretches):
     from operator import attrgetter
     p = 0
     sortedstretchlist = []
-    for entry in sorted(listofstretches, key=attrgetter('genes_in_row', 'score', 'len',
-         'slen', 'coord', 'scoord', 'end'), reverse=True):
+    for entry in sorted(listofstretches,
+                        key=attrgetter('genes_in_row', 'score', 'len',
+                                       'slen', 'coord', 'scoord', 'end'),
+                        reverse=True):
         p = p + 1
         entry.position = p
         sortedstretchlist.append(entry)

@@ -98,7 +98,6 @@ except:
         input_file = input(
             'Please enter directory and file of GNYt98ter.41.closedgt1000.sorted file')
 
-output_file = '../../i1sz/GNY98.pyout'
 fasta_sequences = SeqIO.parse(open(input_file), 'fasta')
 
 # Read in all E. tef scaffolds and echos scaffold name and nucleotide sequence

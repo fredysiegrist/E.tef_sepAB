@@ -65,7 +65,7 @@ for q in range(0, len(lol)):
             int(comment[q][5]),  # stretch
             int(str(comment[q][0])[1]),  # number
             float(comment[q][1]),  # score
-            str(comment[q][4]) # reversion
+            str(comment[q][4])  # reversion
         )
         ]
     elif str(comment[q][4]) == 'r':
@@ -87,15 +87,15 @@ for q in range(0, len(lol)):
             int(comment[q][5]),  # stretch
             int(str(comment[q][0])[1]),  # number
             float(comment[q][1]),  # score
-            str(comment[q][4]) # reversion
+            str(comment[q][4])  # reversion
         )
         ]
     if str(lol[q][1]).split('||')[0] in D:
         D[(str(lol[q][1]).split('||')[0])].extend(entry)
     else:
         D[(str(lol[q][1]).split('||')[0])] = entry
-#print(D['scaffold105'])
-#input()
+# print(D['scaffold105'])
+# input()
 # print(s.encode(pwd.getpwuid(os.getuid()).pw_gecos))
 
 # Here is a code-chunk to easely import fasta files dependent on current user
@@ -111,9 +111,9 @@ except:
         input_file = '/home/fredy/i1sz/GNYt98ter.41.closedgt1000.sorted'
     else:
         input_file = input(
-    'Please enter directory and file of GNYt98ter.41.closedgt1000.sorted file')
+            'Please enter directory and file of GNYt98ter.41.closedgt1000.sorted file')
 
-output_file = '../../i1sz/GNY98.pyout'
+
 # Read in all E. tef scaffolds and echos scaffold name and nucleotide sequence
 fasta_sequences = SeqIO.parse(open(input_file), 'fasta')
 
@@ -126,7 +126,7 @@ except:
         input_file = '../../i1sz/Sorghum_bicolor.faa'
     elif pwd.getpwuid(
             os.getuid()).pw_gecos == 'Fredy Siegrist,,,' or pwd.getpwuid(
-            os.getuid()).pw_gecos == 'Gina Cannarozzi,,,':
+        os.getuid()).pw_gecos == 'Gina Cannarozzi,,,':
         input_file = '/home/fredy/i1sz/Sorghum_bicolor.faa'
     else:
         input_file = input(
@@ -142,17 +142,42 @@ from numpy import histogram
 
 missmatch = 0
 a = []
+stretches = []
 
 print('\nTest phase over! Starting real thing: One two three')
 
 for fasta in fasta_sequences:
     try:
-        a.append(find_synthenic_block(D[fasta.id], fasta, chr_sequences))
-    except KeyError:   # Only except for missing keys!
+        singleton = find_synthenic_block(D[fasta.id], fasta, chr_sequences)
+        stretches.append(singleton[0])
+        a.append(singleton[1])
+    except KeyError:  # Only except for missing keys!
         missmatch = missmatch + 1
 
 print('\nNumber of not matched scaffolds: ' + str(missmatch))
 print(histogram(a, bins=[0, 1, 2, 3, 4, 5, 10, 20, 100]))
+
+# Save Stretch-list in a file for R import.
+output_file = '../../i1sz/stretches_output.csv'
+try:
+    with open(output_file, 'w') as csvfile:
+        stretchwriter = csv.writer(csvfile, delimiter='\t',
+                                   quotechar='|', quoting=csv.QUOTE_MINIMAL)
+        for stretch in stretches:
+            for entry in stretch:
+                stret = [str(entry.chr), str(entry.start), str(entry.end),
+                         str(entry.ori),
+                         str(entry.scaffold), str(entry.sstart),
+                         str(entry.send),
+                         str(entry.sori), str(entry.stretch),
+                         str(entry.number),
+                         str(entry.score), str(entry.reversion),
+                         str(entry.gir), str(entry.block), str(entry.position),
+                         str(entry.cfa), str(entry.sfa)]
+                stretchwriter.writerow(stret)
+                # stretchwriter.writerow("\# "+str(entry[0].scafname))
+except FileNotFoundError:
+    print('File not found')
 
 # Plot a histogram of how many stretches have been found on different scaffolds
 
@@ -161,4 +186,3 @@ plt.title("Histogram")
 plt.xlabel("3+ genes stretches in scaffold")
 plt.ylabel("Frequency")
 plt.show()
-
