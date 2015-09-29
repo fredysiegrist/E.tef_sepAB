@@ -43,7 +43,7 @@ for m in comments:
         for n in range(0, int(m[5])):
             comment.append(m)
     except IndentationError:
-        pass    # empty comment first line
+        pass  # empty comment first line
     except IndexError:
         pass
 
@@ -69,7 +69,7 @@ for q in range(0, len(lol)):
             int(str(comment[q][0])[1]),  # number
             float(comment[q][1]),  # score
             str(comment[q][4]),  # reversion
-            int(comment[q][6]) # block
+            int(comment[q][6])  # block
         )
         ]
     elif str(comment[q][4]) == 'r':
@@ -92,7 +92,7 @@ for q in range(0, len(lol)):
             int(str(comment[q][0])[1]),  # number
             float(comment[q][1]),  # score
             str(comment[q][4]),  # reversion
-            int(comment[q][6]) # block
+            int(comment[q][6])  # block
         )
         ]
     if str(lol[q][1]).split('||')[0] in D:
@@ -177,7 +177,6 @@ except:
     else:
         output_file = input(
             'Please enter directory and file for output')
-
 try:
     with open(output_file, 'w') as csvfile:
         stretchwriter = csv.writer(csvfile, delimiter='\t',
@@ -191,8 +190,9 @@ try:
                          str(entry.sori), str(entry.stretch),
                          str(entry.number),
                          str(entry.score), str(entry.reversion),
-                         str(entry.genes_in_row), str(entry.block), str(entry.position)]#,
-                         #str(entry.cfa), str(entry.sfa)]
+                         str(entry.genes_in_row), str(entry.block),
+                         str(entry.position)]  # ,
+                # str(entry.cfa), str(entry.sfa)]
                 stretchwriter.writerow(stret)
                 # stretchwriter.writerow("\# "+str(entry[0].scafname))
 except FileNotFoundError:
