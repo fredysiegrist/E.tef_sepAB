@@ -163,3 +163,13 @@ for fasta in fasta_sequences:
                     entry.ori != entry.sori and entry_old.ori == entry.ori
                 )
             else:
+
+
+"""
+     chr    start      end ori     scaffold sstart   send sori stretch number
+1732   2  7423978 71237703   1 scaffold6518  26669 132614   -1       3      1
+4045   1 27532747 68908460   1 scaffold4243   9731  29813   -1       3      1
+     score reversion gir block position
+1732   144         r   3  3775        2
+4045   150         r   3  2637        1
+"""

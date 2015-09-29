@@ -105,7 +105,7 @@ for q in range(0, len(lol)):
 
 # Here is a code-chunk to easely import fasta files dependent on current user
 try:
-    input_file = sys.argv[2]
+    input_file = sys.argv[3]
 except:
     if os.getuid() == 1000 or pwd.getpwuid(
             os.getuid()).pw_gecos == 'fsiegris':
@@ -124,7 +124,7 @@ fasta_sequences = SeqIO.parse(open(input_file), 'fasta')
 
 # Read in all Sorghum chromosomes and sort chromosomes by number
 try:
-    input_file = sys.argv[3]
+    input_file = sys.argv[4]
 except:
     if os.getuid() == 1000 or pwd.getpwuid(
             os.getuid()).pw_gecos == 'fsiegris':
@@ -163,7 +163,21 @@ print('\nNumber of not matched scaffolds: ' + str(missmatch))
 print(histogram(a, bins=[0, 1, 2, 3, 4, 5, 10, 20, 100]))
 
 # Save Stretch-list in a file for R import.
-output_file = '../../i1sz/stretches_condensed2.csv'
+# Read in all Sorghum chromosomes and sort chromosomes by number
+try:
+    output_file = sys.argv[2]
+except:
+    if os.getuid() == 1000 or pwd.getpwuid(
+            os.getuid()).pw_gecos == 'fsiegris':
+        output_file = '../../i1sz/stretches_condensed3.csv'
+    elif pwd.getpwuid(
+            os.getuid()).pw_gecos == 'Fredy Siegrist,,,' or pwd.getpwuid(
+        os.getuid()).pw_gecos == 'Gina Cannarozzi,,,':
+        output_file = '/home/fredy/i1sz/stretches_condensed_new.csv'
+    else:
+        output_file = input(
+            'Please enter directory and file for output')
+
 try:
     with open(output_file, 'w') as csvfile:
         stretchwriter = csv.writer(csvfile, delimiter='\t',
