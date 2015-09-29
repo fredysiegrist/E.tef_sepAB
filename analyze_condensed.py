@@ -163,7 +163,7 @@ print('\nNumber of not matched scaffolds: ' + str(missmatch))
 print(histogram(a, bins=[0, 1, 2, 3, 4, 5, 10, 20, 100]))
 
 # Save Stretch-list in a file for R import.
-output_file = '../../i1sz/stretches_condensed.csv'
+output_file = '../../i1sz/stretches_condensed2.csv'
 try:
     with open(output_file, 'w') as csvfile:
         stretchwriter = csv.writer(csvfile, delimiter='\t',

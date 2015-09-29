@@ -215,7 +215,7 @@ class Stretch(DagChain):
             other.send - other.sstart, other.coord, other.scoord)
 
 
-def find_synthenic_block(coordlist, fa, chfa, D=120000, mingen=3, plot=False):
+def find_synthenic_block(coordlist, fa, chfa, D=1200000, mingen=3, plot=False):
     """
     Maximum distance between two matches (-D): plant-default 120000 bp
     D = 120000
@@ -249,7 +249,7 @@ def find_synthenic_block(coordlist, fa, chfa, D=120000, mingen=3, plot=False):
         if typecheck:
             # print(str(entry.chr == entry_old.chr) + str(entry_old.number ==
             # entry.number) + str(entry_old.score == entry.score))
-            chcheck = entry.chr == entry_old.chr and entry_old.number == entry.number and entry_old.score == entry.score
+            chcheck = entry.chr == entry_old.chr and entry_old.number == entry.number and entry_old.score == entry.score and entry_old.block == entry.block
         else:
             chcheck = entry.chr == entry_old.chr
         if (  # check if on same chromosome or block
@@ -306,13 +306,13 @@ def find_synthenic_block(coordlist, fa, chfa, D=120000, mingen=3, plot=False):
             scafstart = 0
             block = block + 1
         if ecount == len(coordlist):
+            if genes_in_row >= mingen:
+                found_stretch.append(genes_in_row)
             synthenic_hits = __found_synthenic(synthenic_hits, genes_in_row,
                                                entry, cordstart,
                                                scafname, mingen, fa, scafstart,
                                                block, chfa)
             # print("GATE1 " + str(entry.sori))
-            if genes_in_row >= mingen:
-                found_stretch.append(genes_in_row)
         entry_old = entry
     if plot:
         plt.hist(found_stretch)
