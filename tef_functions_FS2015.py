@@ -161,7 +161,7 @@ class Stretch(DagChain):
     """
 
     def __init__(self, dag, genes_in_row, newblock, position, cfa, sfa):
-        super(Stretch, self).__init__(dag.chr, dag.start, dag.end, dag.ori,
+        DagChain.__init__(self, dag.chr, dag.start, dag.end, dag.ori,
                                       dag.scaffold, dag.sstart, dag.send,
                                       dag.sori, dag.stretch, dag.number,
                                       dag.score, dag.reversion, dag.block)
