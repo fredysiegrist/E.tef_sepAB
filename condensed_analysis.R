@@ -64,7 +64,20 @@ cond[cond$scaffold=="scaffold7112",]
 
 # RECONSTRUCTION
 
-bestlist[,c(1, 5, 12)]
+remaster <- bestlist[,c(1, 5, 12)]
 
 # read in the master file for comparision and refiltering
+
 master <- read.delim(file="master_22790_24796.CDS-CDS.last.tdd10.cs0.filtered.dag.all.go_D20_g10_A3.aligncoords.gcoords_ct0.w1000.spa1.sr.cs1.csoS.log.nsd.spa_info.txt", header=TRUE)
+# The most stupid and most often used way to solve the problem - easy solution welcome!
+levels(master$X.CHR1) <- c("01", "10", "02", "03", "04", "05", "06", "07", "08", "09", "unmapped")
+master$X.CHR1 <- factor(master$X.CHR1, levels=c("01", "02", "03", "04", "05", "06", "07", "08", "09", "10","unmapped"))
+master <- master[order(master$X.CHR1),]
+
+connec <- match(master$CHR2,remaster$scaffold, nomatch=NULL)
+connec <- connec[!is.na(connec)]
+
+rownames(remaster[order(master[connec,2]),])
+plot(1:3014, connec, pch=16, xlab="ordinary # in new master", ylab="position on SynMap master file", cex=1, main="ordering in master and new master file", col=colors()[as.numeric(remaster$chr)+98])
+legend(2000, 500, unique(remaster$chr), col=colors()[98:107], pch=16, ncol=4, title="E. tef Chromosome" )
+
