@@ -77,7 +77,34 @@ master <- master[order(master$X.CHR1),]
 connec <- match(master$CHR2,remaster$scaffold, nomatch=NULL)
 connec <- connec[!is.na(connec)]
 
-rownames(remaster[order(master[connec,2]),])
+#rownames(remaster[order(master[connec,2]),])
 plot(1:3014, connec, pch=16, xlab="ordinary # in new master", ylab="position on SynMap master file", cex=1, main="ordering in master and new master file", col=colors()[as.numeric(remaster$chr)+98])
 legend(2000, 500, unique(remaster$chr), col=colors()[98:107], pch=16, ncol=4, title="E. tef Chromosome" )
 
+# Take 2nd position for outliers
+outliers <- (1:3014)[1:3014- connec > sd(1:3014- connec)]
+
+betterlist <- cond[cond[,15]==1,]
+outlierpos <- cond[cond[,5] %in% betterlist[outliers,5],]
+outlier <- outlierpos[outlierpos[,15]==2,]
+betterlist[betterlist$scaffold %in% outlier$scaffold,] <- outlier
+betterlist <- betterlist[order((betterlist[,1]*1e10)+betterlist[,2]+betterlist[,3]),]
+
+betterremaster <- betterlist[,c(1, 5, 12)]
+newcon <- match(master$CHR2,betterremaster$scaffold, nomatch=NULL)
+newcon <- newcon[!is.na(newcon)]
+
+
+
+# Damn thing won't work: which are  the connec values of updated scaffolds, or the newcon positio of them
+updated <- (1:3014)[newcon - connec > 100]  #match(outlier$scaffold, cond$scaffold)
+plot(1:3014, newcon, pch=16, xlab="ordinary # in better master", ylab="position on SynMap master file", cex=1, main="ordering in master and 'better' master file", col=colors()[as.numeric(betterremaster$chr)+98])
+legend(2000, 500, unique(betterremaster$chr), col=colors()[98:107], pch=16, ncol=4, title="E. tef Chromosome" )
+points(updated,newcon[updated], pch="°", col="red", cex=2)
+
+
+# THAT DAMN BETTERLIST IS A WORSE LIST ?!?
+master[master$CHR2=="scaffold4",]
+
+bestlist[bestlist$scaffold=="scaffold4",]
+betterlist[betterlist$scaffold=="scaffold4",]
