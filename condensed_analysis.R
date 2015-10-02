@@ -19,6 +19,7 @@ statdir <- file.path("output")
 # Adressing the files
 cond <- read.delim(file="stretches_condensed3.csv", header=FALSE, skip=0, comment.char = "")
 colnames(cond) <- c("chr", "start", "end", "ori", "scaffold", "sstart", "send", "sori", "stretch", "number", "score", "reversion", "gir", "block", "position")
+cond$scaffold <- as.character(cond$scaffold)
 chrlen <- c(73840612, 77932577, 74440842, 68034345, 62352331, 62208772, 64342021, 55460251, 59635592, 60981625)
 
 require('colorspace')
@@ -41,6 +42,7 @@ for (chrno in 1:10) {
 }
 dev.off()
 
+par(mfrow=c(3,1))
 # Find the stretches that cover more than 1 billion nucleotides:
 cond[(cond[,3]-cond[,2])>2000000,]
 
@@ -72,39 +74,54 @@ master <- read.delim(file="master_22790_24796.CDS-CDS.last.tdd10.cs0.filtered.da
 # The most stupid and most often used way to solve the problem - easy solution welcome!
 levels(master$X.CHR1) <- c("01", "10", "02", "03", "04", "05", "06", "07", "08", "09", "unmapped")
 master$X.CHR1 <- factor(master$X.CHR1, levels=c("01", "02", "03", "04", "05", "06", "07", "08", "09", "10","unmapped"))
+master$CHR2 <- as.character(master$CHR2)
 master <- master[order(master$X.CHR1),]
 
-connec <- match(master$CHR2,remaster$scaffold, nomatch=NULL)
-connec <- connec[!is.na(connec)]
+
+
+slimmaster <- master[which(master$CHR2 %in% cond$scaffold),]
+
+connec <- match(slimmaster$CHR2,remaster$scaffold, nomatch=NULL)
+
 
 #rownames(remaster[order(master[connec,2]),])
 plot(1:3014, connec, pch=16, xlab="ordinary # in new master", ylab="position on SynMap master file", cex=1, main="ordering in master and new master file", col=colors()[as.numeric(remaster$chr)+98])
 legend(2000, 500, unique(remaster$chr), col=colors()[98:107], pch=16, ncol=4, title="E. tef Chromosome" )
 
 # Take 2nd position for outliers
-outliers <- (1:3014)[1:3014- connec > sd(1:3014- connec)]
+
+outliers <- (1:3014)[abs((1:3014) - connec) > sd((1:3014)- connec)]
+points(outliers, connec[outliers], pch="°", col="red", cex=2)
+
+slimmaster[outliers,2]
 
 betterlist <- cond[cond[,15]==1,]
-outlierpos <- cond[cond[,5] %in% betterlist[outliers,5],]
+outlierpos <- cond[cond[,5] %in% slimmaster[outliers,2],]
+
 outlier <- outlierpos[outlierpos[,15]==2,]
-betterlist[betterlist$scaffold %in% outlier$scaffold,] <- outlier
+
+betterlist[match(outlier$scaffold,  betterlist$scaffold),] <- outlier
 betterlist <- betterlist[order((betterlist[,1]*1e10)+betterlist[,2]+betterlist[,3]),]
 
+
 betterremaster <- betterlist[,c(1, 5, 12)]
-newcon <- match(master$CHR2,betterremaster$scaffold, nomatch=NULL)
-newcon <- newcon[!is.na(newcon)]
+newcon <- match(slimmaster$CHR2, betterremaster$scaffold, nomatch=NULL)
 
-
+#plot(newcon, connec)
 
 # Damn thing won't work: which are  the connec values of updated scaffolds, or the newcon positio of them
-updated <- (1:3014)[newcon - connec > 100]  #match(outlier$scaffold, cond$scaffold)
-plot(1:3014, newcon, pch=16, xlab="ordinary # in better master", ylab="position on SynMap master file", cex=1, main="ordering in master and 'better' master file", col=colors()[as.numeric(betterremaster$chr)+98])
+updated <- (1:3014)[abs(newcon - connec) > 100]  #match(outlier$scaffold, cond$scaffold)
+plot(1:3014, (1:3014)-newcon, pch=16, xlab="ordinary # in better master", ylab="position difference", cex=1, main="ordering in master and 'better' master file", col=colors()[as.numeric(betterremaster$chr)+98])
 legend(2000, 500, unique(betterremaster$chr), col=colors()[98:107], pch=16, ncol=4, title="E. tef Chromosome" )
-points(updated,newcon[updated], pch="°", col="red", cex=2)
+points(updated, updated-newcon[updated], pch="°", col="green", cex=2)
 
 
 # THAT DAMN BETTERLIST IS A WORSE LIST ?!?
-master[master$CHR2=="scaffold4",]
+master[master$CHR2==outlier$scaffold,]
 
-bestlist[bestlist$scaffold=="scaffold4",]
-betterlist[betterlist$scaffold=="scaffold4",]
+bestlist[bestlist$scaffold=="scaffold383",]
+(1:3014)[betterlist$scaffold=="scaffold383"]
+
+bettermaster <- betterlist[,c(1:3, 5:7, 12)]
+
+write.table(bettermaster, file="bettermaster.delim", quote=FALSE, sep="\t")
