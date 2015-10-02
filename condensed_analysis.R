@@ -42,21 +42,23 @@ for (chrno in 1:10) {
 }
 dev.off()
 
-par(mfrow=c(3,1))
+
 # Find the stretches that cover more than 1 billion nucleotides:
 cond[(cond[,3]-cond[,2])>2000000,]
 
+pdf(file=paste(getwd(),"/output/bettermaster.pdf", sep=""), paper="a4", width = (2099/100)/2.54, height = (2967/100)/2.54)
+par(mfrow=c(3,1))
 # Plot the s the match length on Sorghum chromosome against scaffold length of E.tef for found stretches
-plot(abs(cond[,3]-cond[,2]), abs(cond[,6]-cond[,7]), pch="•", cex=1, col=seqcol[cond[,15]], xlab="Sorghum chromosome legnth", ylab="E. tef scaffold length", main="scaffold length vs. match length", log="xy", xlim=c(5e+3, 1e+7), ylim=c(1e+3, 1e+6))
+plot(abs(cond[,3]-cond[,2]), abs(cond[,6]-cond[,7]), pch=16, cex=1, col=seqcol[cond[,15]], xlab="Sorghum chromosome legnth", ylab="E. tef scaffold length", main="scaffold length vs. match length", log="xy", xlim=c(5e+3, 1e+7), ylim=c(1e+3, 1e+6))
 abline(0, glm(log(abs(cond[,6]-cond[,7])) ~ log(abs(cond[,3]-cond[,2]))-1)$coefficients,  lwd=2, col="yellow4")
 abline(0, 1,  lwd=2, col="yellow2", lty=3)
 grid(nx = NULL, ny = NULL, col = "lightgray", lty = "dotted", lwd = par("lwd"), equilogs = TRUE)
 length(levels(factor(.bincode(cond[,11], seq(75, 3500, by=100)))))
-points(abs(cond[,3]-cond[,2]), abs(cond[,6]-cond[,7]), pch="•", cex=0.6, col=scorecol[as.numeric(levels(factor(.bincode(cond[,11], seq(75, 3500, by=100)))))])
-legend(2e+6, 5e+3, legend=c("први   stretch","други stretch","шести stretch","score   75 -   175","score 476 -   575","score 976 - 1075"), col=c(seqcol[c(1,2,6)], scorecol[c(1, 5, 10)]), pch=c(rep(c(16, 20), each=3)))
+points(abs(cond[,3]-cond[,2]), abs(cond[,6]-cond[,7]), pch=16, cex=0.4, col=scorecol[as.numeric(levels(factor(.bincode(cond[,11], seq(75, 3500, by=100)))))])
+legend(1e+6, 1e+4, legend=c("1st stretch","2nd stretch","3rd stretch","score   75 -   175","score 476 -   575","score 976 - 1075"), col=c(seqcol[c(1,2,6)], scorecol[c(1, 5, 10)]), pch=c(rep(c(16, 20), each=3)), ncol=2)
 (75+100*(as.numeric(levels(factor(.bincode(cond[,11], seq(75, 3500, by=100)))))-1))[c(1, 5, 10)]
 
-
+#"•"
 # reconstruct the master file
 bestlist <- cond[cond[,15]==1,]
 bestlist <- bestlist[order((bestlist[,1]*1e10)+bestlist[,2]+bestlist[,3]),]
@@ -86,7 +88,7 @@ connec <- match(slimmaster$CHR2,remaster$scaffold, nomatch=NULL)
 
 #rownames(remaster[order(master[connec,2]),])
 plot(1:3014, connec, pch=16, xlab="ordinary # in new master", ylab="position on SynMap master file", cex=1, main="ordering in master and new master file", col=colors()[as.numeric(remaster$chr)+98])
-legend(2000, 500, unique(remaster$chr), col=colors()[98:107], pch=16, ncol=4, title="E. tef Chromosome" )
+legend(2000, 1000, unique(remaster$chr), col=colors()[98:107], pch=16, ncol=5, title="E. tef Chromosome" )
 
 # Take 2nd position for outliers
 
@@ -112,10 +114,10 @@ newcon <- match(slimmaster$CHR2, betterremaster$scaffold, nomatch=NULL)
 # Damn thing won't work: which are  the connec values of updated scaffolds, or the newcon positio of them
 updated <- (1:3014)[abs(newcon - connec) > 100]  #match(outlier$scaffold, cond$scaffold)
 plot(1:3014, (1:3014)-newcon, pch=16, xlab="ordinary # in better master", ylab="position difference", cex=1, main="ordering in master and 'better' master file", col=colors()[as.numeric(betterremaster$chr)+98])
-legend(2000, 500, unique(betterremaster$chr), col=colors()[98:107], pch=16, ncol=4, title="E. tef Chromosome" )
+legend(0, 3, unique(betterremaster$chr), col=colors()[98:107], pch=16, ncol=5)
 points(updated, updated-newcon[updated], pch="°", col="green", cex=2)
 
-
+dev.off()
 # THAT DAMN BETTERLIST IS A WORSE LIST ?!?
 master[master$CHR2==outlier$scaffold,]
 
