@@ -118,11 +118,6 @@ legend(0, 3, unique(betterremaster$chr), col=colors()[98:107], pch=16, ncol=5)
 points(updated, updated-newcon[updated], pch="°", col="green", cex=2)
 
 dev.off()
-# THAT DAMN BETTERLIST IS A WORSE LIST ?!?
-master[master$CHR2==outlier$scaffold,]
-
-bestlist[bestlist$scaffold=="scaffold383",]
-(1:3014)[betterlist$scaffold=="scaffold383"]
 
 bettermaster <- betterlist[,c(1:3, 5:7, 12)]
 
