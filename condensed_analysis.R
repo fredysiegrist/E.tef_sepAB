@@ -119,6 +119,39 @@ points(updated, updated-newcon[updated], pch="°", col="green", cex=2)
 
 dev.off()
 
-bettermaster <- betterlist[,c(1:3, 5:7, 12)]
+bettermaster <- cbind(betterlist[,c(1:3, 5:7, 12, 13)], no=as.numeric(rownames(betterlist)), chrt=factor(rep("unmapped", dim(betterlist)[1]), levels=c("A", "B", "unmapped") ))
+
 
 write.table(bettermaster, file="bettermaster.delim", quote=FALSE, sep="\t")
+
+max(as.numeric(rownames(bettermaster)))
+length(unique(bettermaster[,8]))
+gcol <- terrain_hcl(36, c=c(65,0), l=c(45, 95), power=c(1/3, 1.5))
+gircol <- rep("#FFFFFF", 68)
+girs <- unique(bettermaster[,8])
+girorder <- girs[order(unique(bettermaster[,8]))]
+transmatrix <- cbind(unique(bettermaster[,8]), order(girorder, decreasing = TRUE))
+gircol[transmatrix[,1]] <- gcol[transmatrix[,2]]
+
+
+par(mfrow=c(2,5))
+for (chrno in 1:10) {
+    n<-1
+    plot(seq(1, chrlen[chrno], length.out=max(as.numeric(rownames(bettermaster)))), (1:max(as.numeric(rownames(bettermaster)))), type='n', sub=paste("chr #",chrno), xlab="nt", ylab="scaffolds", main="E. tef on Sorghum")
+    apply(bettermaster[bettermaster$chr==chrno, c(2:3,8:9)], 1, function(z) {n<-z[4]; x<- z[1:2]; y<-c(n,n); colr <- gircol[z[3]]; lines(x, y, col=colr, lwd=3)})
+}
+
+
+# Split to A and B chromosome
+
+
+for (entry in 1:dim(bettermaster)[1]) {
+    actchr <- bettermaster[entry, 1]
+    if (sum(bettermaster$chrt=="A" & bettermaster$chr==actchr)==0) { bettermaster[entry, 10] <- "A" }
+    else { if (bettermaster[entry, 2] > range(bettermaster[bettermaster$chrt=="A" & bettermaster$chr==actchr, 2:3])[2]) { bettermaster[entry, 10] <- "A" }
+           else { if (sum(bettermaster$chrt=="B" & bettermaster$chr==actchr)==0)  { bettermaster[entry, 10] <- "B" }
+                  else { if (bettermaster[entry, 2] > range(bettermaster[bettermaster$chrt=="B" & bettermaster$chr==actchr, 2:3])[2]) { bettermaster[entry, 10] <- "B" }
+                  }
+           }
+    }
+}
