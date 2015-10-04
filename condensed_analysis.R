@@ -27,6 +27,7 @@ seqcol <- heat_hcl(16, c=c(80,30), l = c(30,90), power = c(1/5, 1.5))
 scorecol <- terrain_hcl(20, c=c(65,0), l=c(45, 95), power=c(1/3, 1.5))
 seqcol[1] <- "#3C3CEC"
 
+# This is a very energy consuming thing, don't run it if not necessary
 pdf(file=paste(getwd(),"/output/density_map_chromosomes_cond4.pdf", sep=""), paper="a4r", width = (2967/150)/2.54, height = (2099/150)/2.54)
 for (chrno in 1:10) {
     n<-1
@@ -78,7 +79,6 @@ levels(master$X.CHR1) <- c("01", "10", "02", "03", "04", "05", "06", "07", "08",
 master$X.CHR1 <- factor(master$X.CHR1, levels=c("01", "02", "03", "04", "05", "06", "07", "08", "09", "10","unmapped"))
 master$CHR2 <- as.character(master$CHR2)
 master <- master[order(master$X.CHR1),]
-
 
 
 slimmaster <- master[which(master$CHR2 %in% cond$scaffold),]
@@ -156,14 +156,85 @@ for (entry in 1:dim(bettermaster)[1]) {
     }
 }
 
-bettermaster[,10] <- as.numeric(bettermaster[,10])
+
+
+# Bettersplit using gir
+
+require(IRanges)
+bettermaster <- cbind(betterlist[,c(1:3, 5:7, 12, 13)], no=as.numeric(rownames(betterlist)), chrt=factor(rep("unmapped", dim(betterlist)[1]), levels=c("A", "B", "unmapped") ))
+ABmaster <- bettermaster[order(bettermaster$gir, decreasing = TRUE),]
+
+for (entry in 1:dim(ABmaster)[1]) {
+    actchr <- ABmaster[entry, 1]
+    ranges <- IRanges(ABmaster[entry,2], ABmaster[entry,3])
+    if (sum(ABmaster$chrt=="A" & ABmaster$chr==actchr)==0) { ABmaster[entry, 10] <- "A" }
+    else {
+        rangesA <- IRanges(ABmaster[ABmaster$chrt=="A" & ABmaster$chr==actchr, 2], ABmaster[ABmaster$chrt=="A" & ABmaster$chr==actchr, 3])
+        if ( countOverlaps(ranges, rangesA, type="any")==0 ) { ABmaster[entry, 10] <- "A" }
+           else {
+                rangesB <- IRanges(ABmaster[ABmaster$chrt=="B" & ABmaster$chr==actchr, 2], ABmaster[ABmaster$chrt=="B" & ABmaster$chr==actchr, 3])
+                if (sum(ABmaster$chrt=="B" & ABmaster$chr==actchr)==0)  { ABmaster[entry, 10] <- "B" }
+                  else {
+                        rangesB <- IRanges(ABmaster[ABmaster$chrt=="B" & ABmaster$chr==actchr, 2], ABmaster[ABmaster$chrt=="B" & ABmaster$chr==actchr, 3])
+                        if (countOverlaps(ranges, rangesB, type="any")==0 )  { ABmaster[entry, 10] <- "B" }
+                  }
+           }
+    }
+}
+
+write.table(ABmaster, file="ABmaster.delim", quote=FALSE, sep="\t")
+ABmaster[,10] <- as.numeric(ABmaster[,10])
+
+
+pdf(file=paste(getwd(),"/output/ABmaster.pdf", sep=""), paper="a4r", width = (2967/100)/2.54, height = (2099/100)/2.54)
+for (chrno in 1:10) {
+    plot(seq(1, chrlen[chrno], length.out=5), (0:4), type='n', sub=paste("chr #",chrno), xlab="nt", ylab="scaffolds", main="Randomly attributed E. tef scaffolds to A/B/umapped on Sorghum chromosomes")
+    apply(ABmaster[ABmaster$chr==chrno, c(2:3,8,10)], 1, function(z) {n<-jitter(as.numeric(z[4]), 5); x<- z[1:2]; y<-c(n,n); colr <- gircol[z[3]]; lines(x, y, col=colr, lwd=5)})
+}
+
 par(mfrow=c(2,5))
 for (chrno in 1:10) {
-    n<-1
-    plot(seq(1, chrlen[chrno], length.out=3), (1:3), type='n', sub=paste("chr #",chrno), xlab="nt", ylab="scaffolds", main="E. tef on Sorghum")
-    apply(bettermaster[bettermaster$chr==chrno, c(2:3,8,10)], 1, function(z) {n<-as.numeric(z[4]); x<- z[1:2]; y<-c(n,n); colr <- gircol[z[3]]; lines(x, y, col=colr, lwd=3)})
+    plot(seq(1, chrlen[chrno], length.out=5), (0:4), type='n', sub=paste("chr #",chrno), xlab="nt", ylab="scaffolds", main="E. tef on Sorghum")
+    apply(ABmaster[ABmaster$chr==chrno, c(2:3,8,10)], 1, function(z) {n<-jitter(as.numeric(z[4]), 3); x<- z[1:2]; y<-c(n,n); colr <- gircol[z[3]]; lines(x, y, col=colr, lwd=3)})
 }
-par(mfrow=c(1,1))
-    n<-1
-    plot(seq(1, chrlen[chrno], length.out=3), (1:3), type='n', sub=paste("chr #",chrno), xlab="nt", ylab="scaffolds", main="E. tef on Sorghum")
-    apply(bettermaster[bettermaster$chr==chrno, c(2:3,8,10)], 1, function(z) {n<-as.numeric(z[4]); x<- z[1:2]; y<-c(n,n); colr <- gircol[z[3]]; lines(x, y, col=colr, lwd=3)})
+
+
+dev.off()
+
+
+# usage of IRanges
+library(IRanges)
+ranges <- IRanges(ABmaster[entry,2], ABmaster[entry,3])
+rangesA <- IRanges(ABmaster[ABmaster$chrt=="A" & ABmaster$chr==actchr, 2], ABmaster[ABmaster$chrt=="A" & ABmaster$chr==actchr, 3])
+rangesB <- IRanges(ABmaster[ABmaster$chrt=="B" & ABmaster$chr==actchr, 2], ABmaster[ABmaster$chrt=="B" & ABmaster$chr==actchr, 3])
+rangesX <- IRanges(ABmaster[ABmaster$chrt=="unmapped" & ABmaster$chr==actchr, 2], ABmaster[ABmaster$chrt=="unmapped" & ABmaster$chr==actchr, 3])
+#which rangesX contain at least one ranges?
+countOverlaps(ranges, rangesX, type="any")>0
+
+plotRanges <- function(x, xlim = x, main = deparse(substitute(x)), col = "black", sep = 0.5, ...) {
+height <- 1
+if (is(xlim, "Ranges"))
+xlim <- c(min(start(xlim)), max(end(xlim)))
+bins <- disjointBins(IRanges(start(x), end(x) + 1))
+plot.new()
+plot.window(xlim, c(0, max(bins)*(height + sep)))
+ybottom <- bins * (sep + height) - height
+rect(start(x)-0.5, ybottom, end(x)+0.5, ybottom + height, col = col, ...)
+title(main)
+axis(1)
+}
+
+pdf(file=paste(getwd(),"/output/plotRanges.pdf", sep=""), paper="a4r", width = (2967/100)/2.54, height = (2099/100)/2.54)
+
+par(mfrow=c(2,5))
+for (chrno in 1:10) {
+    rangesC <- IRanges(cond[cond$chr==chrno, 2], cond[cond$chr==chrno, 3])
+    plotRanges(rangesC, main=paste("All on Chr", chrno))
+}
+
+for (chrno in 1:10) {
+    rangesC <- IRanges(betterlist[betterlist$chr==chrno, 2], betterlist[betterlist$chr==chrno, 3])
+    plotRanges(rangesC, main=paste("Best on Chr", chrno))
+}
+
+dev.off()
