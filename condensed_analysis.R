@@ -155,3 +155,15 @@ for (entry in 1:dim(bettermaster)[1]) {
            }
     }
 }
+
+bettermaster[,10] <- as.numeric(bettermaster[,10])
+par(mfrow=c(2,5))
+for (chrno in 1:10) {
+    n<-1
+    plot(seq(1, chrlen[chrno], length.out=3), (1:3), type='n', sub=paste("chr #",chrno), xlab="nt", ylab="scaffolds", main="E. tef on Sorghum")
+    apply(bettermaster[bettermaster$chr==chrno, c(2:3,8,10)], 1, function(z) {n<-as.numeric(z[4]); x<- z[1:2]; y<-c(n,n); colr <- gircol[z[3]]; lines(x, y, col=colr, lwd=3)})
+}
+par(mfrow=c(1,1))
+    n<-1
+    plot(seq(1, chrlen[chrno], length.out=3), (1:3), type='n', sub=paste("chr #",chrno), xlab="nt", ylab="scaffolds", main="E. tef on Sorghum")
+    apply(bettermaster[bettermaster$chr==chrno, c(2:3,8,10)], 1, function(z) {n<-as.numeric(z[4]); x<- z[1:2]; y<-c(n,n); colr <- gircol[z[3]]; lines(x, y, col=colr, lwd=3)})
