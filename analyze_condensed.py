@@ -169,7 +169,7 @@ try:
 except:
     if os.getuid() == 1000 or pwd.getpwuid(
             os.getuid()).pw_gecos == 'fsiegris':
-        output_file = '../../i1sz/stretches_condensed3.csv'
+        output_file = '../../i1sz/stretches_condensed_4.csv'
     elif pwd.getpwuid(
             os.getuid()).pw_gecos == 'Fredy Siegrist,,,' or pwd.getpwuid(
         os.getuid()).pw_gecos == 'Gina Cannarozzi,,,':

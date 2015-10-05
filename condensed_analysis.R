@@ -59,7 +59,6 @@ points(abs(cond[,3]-cond[,2]), abs(cond[,6]-cond[,7]), pch=16, cex=0.4, col=scor
 legend(1e+6, 1e+4, legend=c("1st stretch","2nd stretch","3rd stretch","score   75 -   175","score 476 -   575","score 976 - 1075"), col=c(seqcol[c(1,2,6)], scorecol[c(1, 5, 10)]), pch=c(rep(c(16, 20), each=3)), ncol=2)
 (75+100*(as.numeric(levels(factor(.bincode(cond[,11], seq(75, 3500, by=100)))))-1))[c(1, 5, 10)]
 
-#"•"
 # reconstruct the master file
 bestlist <- cond[cond[,15]==1,]
 bestlist <- bestlist[order((bestlist[,1]*1e10)+bestlist[,2]+bestlist[,3]),]
@@ -109,7 +108,6 @@ betterlist <- betterlist[order((betterlist[,1]*1e10)+betterlist[,2]+betterlist[,
 betterremaster <- betterlist[,c(1, 5, 12)]
 newcon <- match(slimmaster$CHR2, betterremaster$scaffold, nomatch=NULL)
 
-#plot(newcon, connec)
 
 # Damn thing won't work: which are  the connec values of updated scaffolds, or the newcon positio of them
 updated <- (1:3014)[abs(newcon - connec) > 100]  #match(outlier$scaffold, cond$scaffold)
@@ -133,6 +131,7 @@ girorder <- girs[order(unique(bettermaster[,8]))]
 transmatrix <- cbind(unique(bettermaster[,8]), order(girorder, decreasing = TRUE))
 gircol[transmatrix[,1]] <- gcol[transmatrix[,2]]
 
+pdf(file=paste(getwd(),"/output/bettrmaster.pdf", sep=""), paper="a4r", width = (2967/100)/2.54, height = (2099/100)/2.54)
 
 par(mfrow=c(2,5))
 for (chrno in 1:10) {
@@ -140,7 +139,7 @@ for (chrno in 1:10) {
     plot(seq(1, chrlen[chrno], length.out=max(as.numeric(rownames(bettermaster)))), (1:max(as.numeric(rownames(bettermaster)))), type='n', sub=paste("chr #",chrno), xlab="nt", ylab="scaffolds", main="E. tef on Sorghum")
     apply(bettermaster[bettermaster$chr==chrno, c(2:3,8:9)], 1, function(z) {n<-z[4]; x<- z[1:2]; y<-c(n,n); colr <- gircol[z[3]]; lines(x, y, col=colr, lwd=3)})
 }
-
+dev.off()
 
 # Split to A and B chromosome
 
@@ -156,7 +155,21 @@ for (entry in 1:dim(bettermaster)[1]) {
     }
 }
 
+bettermaster[,10] <- as.numeric(bettermaster[,10])
 
+pdf(file=paste(getwd(),"/output/firstAB.pdf", sep=""), paper="a4r", width = (2967/100)/2.54, height = (2099/100)/2.54)
+for (chrno in 1:10) {
+    plot(seq(1, chrlen[chrno], length.out=5), (0:4), type='n', sub=paste("chr #",chrno), xlab="nt", ylab="scaffolds", main="Randomly attributed E. tef scaffolds to A/B/umapped on Sorghum chromosomes")
+    apply(bettermaster[bettermaster$chr==chrno, c(2:3,8,10)], 1, function(z) {n<-jitter(as.numeric(z[4]), 5); x<- z[1:2]; y<-c(n,n); colr <- gircol[z[3]]; lines(x, y, col=colr, lwd=5)})
+}
+par(mfrow=c(2,5))
+for (chrno in 1:10) {
+    plot(seq(1, chrlen[chrno], length.out=5), (0:4), type='n', sub=paste("chr #",chrno), xlab="nt", ylab="scaffolds", main="E. tef on Sorghum")
+    apply(bettermaster[bettermaster$chr==chrno, c(2:3,8,10)], 1, function(z) {n<-jitter(as.numeric(z[4]), 3); x<- z[1:2]; y<-c(n,n); colr <- gircol[z[3]]; lines(x, y, col=colr, lwd=3)})
+}
+
+
+dev.off()
 
 # Bettersplit using gir
 
@@ -182,11 +195,11 @@ for (entry in 1:dim(ABmaster)[1]) {
     }
 }
 
-write.table(ABmaster, file="ABmaster.delim", quote=FALSE, sep="\t")
+write.table(ABmaster, file="ABmaster_2stretch.delim", quote=FALSE, sep="\t")
 ABmaster[,10] <- as.numeric(ABmaster[,10])
 
 
-pdf(file=paste(getwd(),"/output/ABmaster.pdf", sep=""), paper="a4r", width = (2967/100)/2.54, height = (2099/100)/2.54)
+pdf(file=paste(getwd(),"/output/ABmaster2.pdf", sep=""), paper="a4r", width = (2967/100)/2.54, height = (2099/100)/2.54)
 for (chrno in 1:10) {
     plot(seq(1, chrlen[chrno], length.out=5), (0:4), type='n', sub=paste("chr #",chrno), xlab="nt", ylab="scaffolds", main="Randomly attributed E. tef scaffolds to A/B/umapped on Sorghum chromosomes")
     apply(ABmaster[ABmaster$chr==chrno, c(2:3,8,10)], 1, function(z) {n<-jitter(as.numeric(z[4]), 5); x<- z[1:2]; y<-c(n,n); colr <- gircol[z[3]]; lines(x, y, col=colr, lwd=5)})
