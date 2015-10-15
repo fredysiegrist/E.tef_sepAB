@@ -2,8 +2,8 @@
 #date -- 09.09.2015
 #title -- statistical analyses of tef scaffold matches from CoGe's SynMap on Sorghum chromosomes
 
-require(limma)
-source("tef_analysis_functions_2015.R")
+#require(limma)
+#source("tef_analysis_functions_2015.R")
 
 
 ##########
@@ -17,7 +17,7 @@ statdir <- file.path("output")
 
 
 # Adressing the files
-cond <- read.delim(file="stretches_condensed3.csv", header=FALSE, skip=0, comment.char = "")
+cond <- read.delim(file="stretches_condensed_12mio_scoreFirst.csv", header=FALSE, skip=0, comment.char = "")
 colnames(cond) <- c("chr", "start", "end", "ori", "scaffold", "sstart", "send", "sori", "stretch", "number", "score", "reversion", "gir", "block", "position")
 cond$scaffold <- as.character(cond$scaffold)
 chrlen <- c(73840612, 77932577, 74440842, 68034345, 62352331, 62208772, 64342021, 55460251, 59635592, 60981625)
@@ -47,6 +47,7 @@ dev.off()
 # Find the stretches that cover more than 1 billion nucleotides:
 cond[(cond[,3]-cond[,2])>2000000,]
 
+
 pdf(file=paste(getwd(),"/output/bettermaster.pdf", sep=""), paper="a4", width = (2099/100)/2.54, height = (2967/100)/2.54)
 par(mfrow=c(3,1))
 # Plot the s the match length on Sorghum chromosome against scaffold length of E.tef for found stretches
@@ -61,9 +62,10 @@ legend(1e+6, 1e+4, legend=c("1st stretch","2nd stretch","3rd stretch","score   7
 
 # reconstruct the master file
 bestlist <- cond[cond[,15]==1,]
-bestlist <- bestlist[order((bestlist[,1]*1e10)+bestlist[,2]+bestlist[,3]),]
+# introduced /2 maybe it does matter ;-)
+bestlist <- bestlist[order((bestlist[,1]*1e10)+(bestlist[,2]+bestlist[,3])/2),]
 
-    # scaffold7112 appears on chromosome 1 while it is attributed to chromosome 2 in the master list.
+# scaffold7112 appears on chromosome 1 while it is attributed to chromosome 2 in the master list.
 cond[cond$scaffold=="scaffold7112",]
 
 # RECONSTRUCTION
@@ -79,19 +81,16 @@ master$X.CHR1 <- factor(master$X.CHR1, levels=c("01", "02", "03", "04", "05", "0
 master$CHR2 <- as.character(master$CHR2)
 master <- master[order(master$X.CHR1),]
 
-
 slimmaster <- master[which(master$CHR2 %in% cond$scaffold),]
 
 connec <- match(slimmaster$CHR2,remaster$scaffold, nomatch=NULL)
 
-
-#rownames(remaster[order(master[connec,2]),])
-plot(1:3014, connec, pch=16, xlab="ordinary # in new master", ylab="position on SynMap master file", cex=1, main="ordering in master and new master file", col=colors()[as.numeric(remaster$chr)+98])
-legend(2000, 1000, unique(remaster$chr), col=colors()[98:107], pch=16, ncol=5, title="E. tef Chromosome" )
+plot(1:length(connec), connec, pch=16, xlab="ordinal # in new master", ylab="position on SynMap master file", cex=1, main="ordering in master and new master file", col=colors()[as.numeric(remaster$chr)+98])
+legend(0, 2000, unique(remaster$chr), col=colors()[99:108], pch=16, ncol=5, title="E. tef Chromosome" )
 
 # Take 2nd position for outliers
 
-outliers <- (1:3014)[abs((1:3014) - connec) > sd((1:3014)- connec)]
+outliers <- (1:length(connec))[abs((1:length(connec)) - connec) > sd((1:length(connec))- connec)]
 points(outliers, connec[outliers], pch="°", col="red", cex=2)
 
 slimmaster[outliers,2]
@@ -100,25 +99,31 @@ betterlist <- cond[cond[,15]==1,]
 outlierpos <- cond[cond[,5] %in% slimmaster[outliers,2],]
 
 outlier <- outlierpos[outlierpos[,15]==2,]
+# write.csv(cbind(outlierpos[outlierpos[,15]==2,], outlierpos[outlierpos[,15]==1,]), file="outlier12.csv")
 
-betterlist[match(outlier$scaffold,  betterlist$scaffold),] <- outlier
-betterlist <- betterlist[order((betterlist[,1]*1e10)+betterlist[,2]+betterlist[,3]),]
+# iterate to find best position
 
+while (length(outliers)>0) {
+    for ( n in 1:max(cond[,15])) {
+        itermaster <- betterlist[,c(1, 5, 12)]
+        iterconnec <- match(slimmaster$CHR2, itermaster$scaffold, nomatch=NULL)
+        outliers <- (1:length(iterconnec))[abs((1:length(iterconnec)) - iterconnec) > 6 ]# sd((1:length(iterconnec))- iterconnec)]
+        outlierpos <- cond[cond[,5] %in% slimmaster[outliers,2],]
+        outlier <- outlierpos[outlierpos[,15]==n,]
+        betterlist[match(outlier$scaffold,  betterlist$scaffold),] <- outlier
+        betterlist <- betterlist[order((betterlist[,1]*1e10)+betterlist[,2]+betterlist[,3]),]
+    }
+    print(paste(length(outliers)))
+}
 
-betterremaster <- betterlist[,c(1, 5, 12)]
-newcon <- match(slimmaster$CHR2, betterremaster$scaffold, nomatch=NULL)
-
-
-# Damn thing won't work: which are  the connec values of updated scaffolds, or the newcon positio of them
-updated <- (1:3014)[abs(newcon - connec) > 100]  #match(outlier$scaffold, cond$scaffold)
-plot(1:3014, (1:3014)-newcon, pch=16, xlab="ordinary # in better master", ylab="position difference", cex=1, main="ordering in master and 'better' master file", col=colors()[as.numeric(betterremaster$chr)+98])
-legend(0, 3, unique(betterremaster$chr), col=colors()[98:107], pch=16, ncol=5)
-points(updated, updated-newcon[updated], pch="°", col="green", cex=2)
+updated <- (1:length(connec))[abs(iterconnec - connec) > 100]
+plot(1:length(connec), (1:length(connec))-iterconnec, pch=16, xlab="ordinal # in better master", ylab="position difference", cex=1, main="ordering in master and 'better' master file", col=colors()[as.numeric(itermaster$chr)+98])
+legend(0, 3, unique(itermaster$chr), col=colors()[99:108], pch=16, ncol=5)
+points(updated, updated-iterconnec[updated], pch="°", col="green", cex=2)
 
 dev.off()
 
 bettermaster <- cbind(betterlist[,c(1:3, 5:7, 12, 13)], no=as.numeric(rownames(betterlist)), chrt=factor(rep("unmapped", dim(betterlist)[1]), levels=c("A", "B", "unmapped") ))
-
 
 write.table(bettermaster, file="bettermaster.delim", quote=FALSE, sep="\t")
 
@@ -168,7 +173,6 @@ for (chrno in 1:10) {
     apply(bettermaster[bettermaster$chr==chrno, c(2:3,8,10)], 1, function(z) {n<-jitter(as.numeric(z[4]), 3); x<- z[1:2]; y<-c(n,n); colr <- gircol[z[3]]; lines(x, y, col=colr, lwd=3)})
 }
 
-
 dev.off()
 
 # Bettersplit using gir
@@ -195,7 +199,9 @@ for (entry in 1:dim(ABmaster)[1]) {
     }
 }
 
-write.table(ABmaster, file="ABmaster_2stretch.delim", quote=FALSE, sep="\t")
+
+ABmasterSorted <- ABmaster[order(ABmaster[,1]*1e10+(ABmaster[,2]+ABmaster[,3])/2),]
+write.table(ABmasterSorted, file="ABmaster_sorted.delim", quote=FALSE, sep="\t")
 ABmaster[,10] <- as.numeric(ABmaster[,10])
 
 
@@ -211,7 +217,6 @@ for (chrno in 1:10) {
     apply(ABmaster[ABmaster$chr==chrno, c(2:3,8,10)], 1, function(z) {n<-jitter(as.numeric(z[4]), 3); x<- z[1:2]; y<-c(n,n); colr <- gircol[z[3]]; lines(x, y, col=colr, lwd=3)})
 }
 
-
 dev.off()
 
 
@@ -221,7 +226,7 @@ ranges <- IRanges(ABmaster[entry,2], ABmaster[entry,3])
 rangesA <- IRanges(ABmaster[ABmaster$chrt=="A" & ABmaster$chr==actchr, 2], ABmaster[ABmaster$chrt=="A" & ABmaster$chr==actchr, 3])
 rangesB <- IRanges(ABmaster[ABmaster$chrt=="B" & ABmaster$chr==actchr, 2], ABmaster[ABmaster$chrt=="B" & ABmaster$chr==actchr, 3])
 rangesX <- IRanges(ABmaster[ABmaster$chrt=="unmapped" & ABmaster$chr==actchr, 2], ABmaster[ABmaster$chrt=="unmapped" & ABmaster$chr==actchr, 3])
-#which rangesX contain at least one ranges?
+# which rangesX contain at least one ranges?
 countOverlaps(ranges, rangesX, type="any")>0
 
 plotRanges <- function(x, xlim = x, main = deparse(substitute(x)), col = "black", sep = 0.5, ...) {
@@ -251,3 +256,5 @@ for (chrno in 1:10) {
 }
 
 dev.off()
+
+

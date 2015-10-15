@@ -67,7 +67,7 @@ for q in range(0, len(lol)):
             int(str(lol[q][1]).split('||')[4]),  # sori
             int(comment[q][5]),  # stretch
             int(str(comment[q][0])[1]),  # number
-            float(comment[q][1]),  # score
+            1/float(comment[q][1]),  # score
             str(comment[q][4]),  # reversion
             int(comment[q][6])  # block
         )
@@ -90,7 +90,7 @@ for q in range(0, len(lol)):
             int(str(lol[r][1]).split('||')[4]),  # sori
             int(comment[q][5]),  # stretch
             int(str(comment[q][0])[1]),  # number
-            float(comment[q][1]),  # score
+            1/float(comment[q][1]),  # score
             str(comment[q][4]),  # reversion
             int(comment[q][6])  # block
         )
@@ -169,7 +169,7 @@ try:
 except:
     if os.getuid() == 1000 or pwd.getpwuid(
             os.getuid()).pw_gecos == 'fsiegris':
-        output_file = '../../i1sz/stretches_condensed_4.csv'
+        output_file = '../../i1sz/stretches_condensed_12mio_scoreFirst.csv'
     elif pwd.getpwuid(
             os.getuid()).pw_gecos == 'Fredy Siegrist,,,' or pwd.getpwuid(
         os.getuid()).pw_gecos == 'Gina Cannarozzi,,,':

@@ -173,3 +173,31 @@ for fasta in fasta_sequences:
 1732   144         r   3  3775        2
 4045   150         r   3  2637        1
 """
+
+
+
+findmaxpos <- function(x) {
+    if (max(cond[cond[,5] %in% slimmaster[x,2],15])>actualpos[x]) {
+        actualpos[x]=actualpos[x]+1
+    }
+    else {
+        actualpos[x]=1
+    }
+    outlier[x] <- outlierpos[outlierpos[,15]==actualpos[x],]
+}
+
+
+
+betterlist[match(outlier$scaffold,  betterlist$scaffold),] <- outlier
+betterlist <- betterlist[order((betterlist[,1]*1e10)+betterlist[,2]+betterlist[,3]),]
+
+
+betterremaster <- betterlist[,c(1, 5, 12)]
+newcon <- match(slimmaster$CHR2, betterremaster$scaffold, nomatch=NULL)
+
+
+# Damn thing won't work: which are  the connec values of updated scaffolds, or the newcon positio of them
+updated <- (1:length(connec))[abs(newcon - connec) > 100]  # match(outlier$scaffold, cond$scaffold)
+plot(1:length(connec), (1:length(connec))-newcon, pch=16, xlab="ordinal # in better master", ylab="position difference", cex=1, main="ordering in master and 'better' master file", col=colors()[as.numeric(betterremaster$chr)+98])
+legend(0, 3, unique(betterremaster$chr), col=colors()[99:108], pch=16, ncol=5)
+points(updated, updated-newcon[updated], pch="°", col="green", cex=2)
