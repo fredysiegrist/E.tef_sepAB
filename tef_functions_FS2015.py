@@ -283,19 +283,18 @@ def find_synthenic_block(coordlist, fa, chfa, D=12000000, mingen=3,
             chcheck = entry.chr == entry_old.chr
         if (  # Checks if on same chromosome or block.
               (entry_old.chr == 0 or (chcheck))):
-            # !!! Will not work if number and score are the same for
-            # different blocks;
             orient = True
             # print(' '+str(entry.chr)+' '+str(entry_old.chr)+' \ '+
             # str(entry.start - entry_old.end)+' '+str(entry.coord)+'-'+
             # str(entry_old.coord)+'*'+str(entry.ori)+'*'+str(entry_old.ori)
             # +' '+str(cordstart)+' Decision: '+str((entry.start -
             # entry_old.end) <= D and entry.start > entry_old.start))
-            if (
-                            abs(entry.start - entry_old.end) <= D and
-                            orient == True):
+            if (  # Checks for distance between two mapping entries.
+                  abs(entry.start - entry_old.end) <= D and
+                          orient == True):
                 genes_in_row = genes_in_row + 1
                 if (genes_in_row == 2):
+                    # Sets the start coordinates for the Stretch.
                     if (entry_old.start == 0):
                         cordstart = entry.start
                         if typecheck:
@@ -309,7 +308,8 @@ def find_synthenic_block(coordlist, fa, chfa, D=12000000, mingen=3,
                             scafstart = entry_old.sstart
                         else:
                             scafstart = 0
-            elif (  # For identical entries in both versions.
+            elif (  # Checks if there are enough genes in row for a good
+                    # stretch if distance criteria is no longer met.
                     entry != entry_old or entry.block != entry_old.block):
                 synthenic_hits = __found_synthenic(synthenic_hits,
                                                    genes_in_row, entry,
@@ -322,7 +322,8 @@ def find_synthenic_block(coordlist, fa, chfa, D=12000000, mingen=3,
                 genes_in_row = 1
                 cordstart = 0
                 scafstart = 0
-        else:
+        else:  # Checks if there were enough genes in row if chromosome or
+            # block has changed between entries.
             synthenic_hits = __found_synthenic(synthenic_hits, genes_in_row,
                                                entry_old, cordstart,
                                                scafname, mingen, fa, scafstart,
@@ -332,10 +333,11 @@ def find_synthenic_block(coordlist, fa, chfa, D=12000000, mingen=3,
                 found_stretch.append(genes_in_row)
             genes_in_row = 1
             # print('chromosome jump '+str(entry_old[0])+' '+str(entry[0]))
+            # Sets back the start coordinates for new block or chromosome.
             cordstart = 0
             scafstart = 0
             block = block + 1
-        if ecount == len(coordlist):
+        if ecount == len(coordlist):  # Final check at the end of the list.
             if genes_in_row >= mingen:
                 found_stretch.append(genes_in_row)
             synthenic_hits = __found_synthenic(synthenic_hits, genes_in_row,
@@ -356,17 +358,21 @@ def find_synthenic_block(coordlist, fa, chfa, D=12000000, mingen=3,
 def __found_synthenic(synthenic_hits, genes_in_row, entry,
                       cordstart, scafname, mingen, fa, scafstart, block, chfa):
     """
-
-    :param synthenic_hits:
-    :param genes_in_row:
-    :param entry:
-    :param cordstart:
-    :param scafname:
-    :param mingen:
-    :param fa:
-    :param scafstart:
-    :param block:
-    :param chfa:
+    Determines the start and end coordinates on the scaffold dependent on
+    whether the block entrie was reversed or not and checkes if the
+    minimal genes in rows criteria is met, in this case the found good stretch
+    is appended to the first input argument and returned.
+    :param synthenic_hits: List of Stretch objects that met criteria so far.
+    :param genes_in_row: Integer counting number of genes in actual stretch.
+    :param entry: DagChain object of last maping element.
+    :param cordstart: Integer with start position of stretch on reference.
+    :param scafname: String with current tef scaffold name.
+    :param mingen: Integer of minimal genes in row criteria.
+    :param fa: SeqIO object with fasta information of scaffold.
+    :param scafstart: Integer with start or end coordinate on scaffold.
+    :param block: Integer counting the current block the DagChain elements are
+                  coming from
+    :param chfa: SeqIO object with fasta information of reference genome.
     :return:
     """
     try:
