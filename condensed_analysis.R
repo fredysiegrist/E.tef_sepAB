@@ -2,7 +2,6 @@
 #date -- 09.09.2015
 #title -- statistical analyses of tef scaffold matches from CoGe's SynMap on Sorghum chromosomes
 
-#require(limma)
 #source("tef_analysis_functions_2015.R")
 
 
@@ -125,7 +124,7 @@ dev.off()
 
 bettermaster <- cbind(betterlist[,c(1:3, 5:7, 12, 13)], no=as.numeric(rownames(betterlist)), chrt=factor(rep("unmapped", dim(betterlist)[1]), levels=c("A", "B", "unmapped") ))
 
-write.table(bettermaster, file="bettermaster.delim", quote=FALSE, sep="\t")
+write.table(bettermaster, file="/output/bettermaster.delim", quote=FALSE, sep="\t")
 
 max(as.numeric(rownames(bettermaster)))
 length(unique(bettermaster[,8]))
@@ -201,8 +200,10 @@ for (entry in 1:dim(ABmaster)[1]) {
 
 
 ABmasterSorted <- ABmaster[order(ABmaster[,1]*1e10+(ABmaster[,2]+ABmaster[,3])/2),]
-write.table(ABmasterSorted, file="ABmaster_sorted.delim", quote=FALSE, sep="\t")
+write.table(ABmasterSorted, file="/output/ABmaster_sorted.delim", quote=FALSE, sep="\t")
 ABmaster[,10] <- as.numeric(ABmaster[,10])
+
+table(ABmasterSorted$chrt)
 
 
 pdf(file=paste(getwd(),"/output/ABmaster2.pdf", sep=""), paper="a4r", width = (2967/100)/2.54, height = (2099/100)/2.54)

@@ -463,7 +463,7 @@ def __decide_best_stretch(listofstretches):
     p = 0
     sortedstretchlist = []
     for entry in sorted(listofstretches,
-                        key=attrgetter('score', 'genes_in_row', 'len',
+                        key=attrgetter('genes_in_row', 'score', 'len',
                                        'slen', 'coord', 'scoord', 'end'),
                         reverse=False):
         p = p + 1
