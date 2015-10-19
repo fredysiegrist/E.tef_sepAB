@@ -26,6 +26,7 @@ seqcol <- heat_hcl(16, c=c(80,30), l = c(30,90), power = c(1/5, 1.5))
 scorecol <- terrain_hcl(20, c=c(65,0), l=c(45, 95), power=c(1/3, 1.5))
 seqcol[1] <- "#3C3CEC"
 
+
 # This is a very energy consuming thing, don't run it if not necessary
 pdf(file=paste(getwd(),"/output/density_map_chromosomes_cond4.pdf", sep=""), paper="a4r", width = (2967/150)/2.54, height = (2099/150)/2.54)
 for (chrno in 1:10) {

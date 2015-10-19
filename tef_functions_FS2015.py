@@ -167,7 +167,7 @@ class Stretch(DagChain):
     (chromosomes).
     """
 
-    def __init__(self, dag, genes_in_row, newblock, position, cfa, sfa):
+    def __init__(self, dag, genes_in_row, newblock, position):
         DagChain.__init__(self, dag.chr, dag.start, dag.end, dag.ori,
                           dag.scaffold, dag.sstart, dag.send,
                           dag.sori, dag.stretch, dag.number,
@@ -175,8 +175,6 @@ class Stretch(DagChain):
         self.genes_in_row = genes_in_row
         self.newblock = newblock
         self.position = position
-        self.cfa = cfa
-        self.sfa = sfa
         self.len = self.end - self.start
         self.slen = self.send - self.sstart
 
@@ -191,6 +189,12 @@ class Stretch(DagChain):
 
     def position(self):
         return self.position
+
+    def cfa(self):
+        return __get_chr_fa(chr_sequences, self.chr, self.start, self.end)
+
+    def sfa(self):
+        return __get_scaffold_fa(fasta, self.sstart, self.send)
 
     def all(self):
         return (
@@ -354,6 +358,38 @@ def find_synthenic_block(coordlist, fa, chfa, D=12000000, mingen=3,
         plt.show()
     return (__decide_best_stretch(synthenic_hits), len(found_stretch))
 
+def __get_starts_ends(entry, cordstart, scafstart):
+    try:
+        if entry.ori == 1:
+            ori = '+'
+        else:
+            ori = '-'
+        if entry.sori == 1:
+            sori = '+'
+        else:
+            sori = '-'
+        if cordstart > entry.start:
+            end = cordstart
+            cordstart = entry.end
+        else:
+            end = entry.end
+        if scafstart > entry.sstart:
+            send = scafstart
+            scafstart = entry.send
+        else:
+            send = entry.send
+        #old chunk to get out nt sequence
+        #sequ = __get_scaffold_fa(fa, scafstart, send)
+        #chseq = __get_chr_fa(chfa, entry.chr, cordstart, end)
+        # sequence = sequ[:50] + ' ... ' + sequ[-50:]
+        # seqcoord = ' ' + str(scafstart) + ' ' + str(send)
+    except:
+        pass
+        #if (genes_in_row >= mingen):
+        #    print('Orientation not checked for!')
+        #chseq = 'NA'
+    return((ori, sori, cordstart, end, scafstart, send))
+
 
 def __found_synthenic(synthenic_hits, genes_in_row, entry,
                       cordstart, scafname, mingen, fa, scafstart, block, chfa):
@@ -375,53 +411,25 @@ def __found_synthenic(synthenic_hits, genes_in_row, entry,
     :param chfa: SeqIO object with fasta information of reference genome.
     :return:
     """
-    try:
-        if entry.ori == 1:
-            ori = '+'
-        else:
-            ori = '-'
-        if entry.sori == 1:
-            sori = '+'
-        else:
-            sori = '-'
-        if cordstart > entry.start:
-            end = cordstart
-            cordstart = entry.end
-        else:
-            end = entry.end
-        if scafstart > entry.sstart:
-            send = scafstart
-            scafstart = entry.send
-        else:
-            send = entry.send
-        sequ = __get_scaffold_fa(fa, scafstart, send)
-        chseq = __get_chr_fa(chfa, entry.chr, cordstart, end)
-        # sequence = sequ[:50] + ' ... ' + sequ[-50:]
-        # seqcoord = ' ' + str(scafstart) + ' ' + str(send)
-    except:
-        if (genes_in_row >= mingen):
-            print('Orientation not checked for!')
-        chseq = 'NA'
-    finally:
-        if (genes_in_row >= mingen):
-            """
-            print('got ' + str(
-                genes_in_row) +
-                  '-genes stretch of synthenic genes on chromosome ' + str(
-                entry.chr) + ' coordinates start: ' + str(
-                cordstart) + ' end: ' + str(
-                entry.end) + ' on ' + scafname + ' in ' + sori + ori +
-                ' orientation:\n' + sequence + seqcoord + ' '+ str(block))
-            """
-            goodstretch = Stretch(
-                DagChain(entry.chr, cordstart, end,
-                         entry.ori, scafname, scafstart,
-                         send, entry.sori,
-                         entry.stretch, entry.number,
-                         entry.score, entry.reversion, entry.block),
-                genes_in_row, block, 0,
-                chseq, sequ)
-            synthenic_hits.append(goodstretch)
+    if (genes_in_row >= mingen):
+        """
+        print('got ' + str(
+            genes_in_row) +
+              '-genes stretch of synthenic genes on chromosome ' + str(
+            entry.chr) + ' coordinates start: ' + str(
+            cordstart) + ' end: ' + str(
+            entry.end) + ' on ' + scafname + ' in ' + sori + ori +
+            ' orientation:\n' + sequence + seqcoord + ' '+ str(block))
+        """
+        (ori, sori, cordstart, end, scafstart, send) = __get_starts_ends(entry, cordstart, scafstart)
+        goodstretch = Stretch(
+            DagChain(entry.chr, cordstart, end,
+                     entry.ori, scafname, scafstart,
+                     send, entry.sori,
+                     entry.stretch, entry.number,
+                     entry.score, entry.reversion, entry.block),
+            genes_in_row, block, 0)
+        synthenic_hits.append(goodstretch)
     return synthenic_hits
 
 

@@ -105,40 +105,40 @@ for q in range(0, len(lol)):
 
 # Here is a code-chunk to easely import fasta files dependent on current user
 try:
-    input_file = sys.argv[3]
+    input_fileS = sys.argv[3]
 except:
     if os.getuid() == 1000 or pwd.getpwuid(
             os.getuid()).pw_gecos == 'fsiegris':
-        input_file = '/windows/GNYt98ter.41.closedgt1000.sorted'
+        input_fileS = '/windows/GNYt98ter.41.closedgt1000.sorted'
     elif pwd.getpwuid(
             os.getuid()).pw_gecos == 'Fredy Siegrist,,,' or pwd.getpwuid(
         os.getuid()).pw_gecos == 'Gina Cannarozzi,,,':
-        input_file = '/home/fredy/i1sz/GNYt98ter.41.closedgt1000.sorted'
+        input_fileS = '/home/fredy/i1sz/GNYt98ter.41.closedgt1000.sorted'
     else:
-        input_file = input(
+        input_fileS = input(
             'Please enter directory and file of GNYt98ter.41.closedgt1000.sorted file')
 
 
 # Read in all E. tef scaffolds and echos scaffold name and nucleotide sequence
-fasta_sequences = SeqIO.parse(open(input_file), 'fasta')
+# fasta_sequences = SeqIO.parse(open(input_fileS), 'fasta')
 
 # Read in all Sorghum chromosomes and sort chromosomes by number
 try:
-    input_file = sys.argv[4]
+    input_fileC = sys.argv[4]
 except:
     if os.getuid() == 1000 or pwd.getpwuid(
             os.getuid()).pw_gecos == 'fsiegris':
-        input_file = '../../i1sz/Sorghum_bicolor.faa'
+        input_fileC = '/debian/Sorghum_bicolor.faa'
     elif pwd.getpwuid(
             os.getuid()).pw_gecos == 'Fredy Siegrist,,,' or pwd.getpwuid(
         os.getuid()).pw_gecos == 'Gina Cannarozzi,,,':
-        input_file = '/home/fredy/i1sz/Sorghum_bicolor.faa'
+        input_fileC = '/home/fredy/i1sz/Sorghum_bicolor.faa'
     else:
-        input_file = input(
+        input_fileC = input(
             'Please enter directory and file of Sorghum_bicolor.faa file')
-chr_sequences = SeqIO.parse(open(input_file), 'fasta')
+# chr_sequences = SeqIO.parse(open(input_fileC), 'fasta')
 # Sort the cromosomes numerically.
-chr_sequences = list(sorted(chr_sequences, key=lambda x: int(x.id[3:])))
+# chr_sequences = list(sorted(chr_sequences, key=lambda x: int(x.id[3:])))
 
 
 # Search scaffolds on DAGchainer document and build up hash links
