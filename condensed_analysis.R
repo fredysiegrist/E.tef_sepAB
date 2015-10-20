@@ -21,6 +21,7 @@ colnames(cond) <- c("chr", "start", "end", "ori", "scaffold", "sstart", "send", 
 cond$scaffold <- as.character(cond$scaffold)
 chrlen <- c(73840612, 77932577, 74440842, 68034345, 62352331, 62208772, 64342021, 55460251, 59635592, 60981625)
 
+# set colors for density maps
 require('colorspace')
 seqcol <- heat_hcl(16, c=c(80,30), l = c(30,90), power = c(1/5, 1.5))
 scorecol <- terrain_hcl(20, c=c(65,0), l=c(45, 95), power=c(1/3, 1.5))
@@ -62,37 +63,36 @@ legend(1e+6, 1e+4, legend=c("1st stretch","2nd stretch","3rd stretch","score   7
 
 # reconstruct the master file
 bestlist <- cond[cond[,15]==1,]
-# introduced /2 maybe it does matter ;-)
 bestlist <- bestlist[order((bestlist[,1]*1e10)+(bestlist[,2]+bestlist[,3])/2),]
 
 # scaffold7112 appears on chromosome 1 while it is attributed to chromosome 2 in the master list.
 cond[cond$scaffold=="scaffold7112",]
 
-# RECONSTRUCTION
-
+# RECONSTRUCTION of master file from CoGe output.
 remaster <- bestlist[,c(1, 5, 12)]
 
-# read in the master file for comparision and refiltering
-
+# Read in the master file for comparision and refiltering.
 master <- read.delim(file="master_22790_24796.CDS-CDS.last.tdd10.cs0.filtered.dag.all.go_D20_g10_A3.aligncoords.gcoords_ct0.w1000.spa1.sr.cs1.csoS.log.nsd.spa_info.txt", header=TRUE)
-# The most stupid and most often used way to solve the problem - easy solution welcome!
+# The most stupid and most often used way to solve the problem
+# - easy solution welcome!
 levels(master$X.CHR1) <- c("01", "10", "02", "03", "04", "05", "06", "07", "08", "09", "unmapped")
 master$X.CHR1 <- factor(master$X.CHR1, levels=c("01", "02", "03", "04", "05", "06", "07", "08", "09", "10","unmapped"))
 master$CHR2 <- as.character(master$CHR2)
 master <- master[order(master$X.CHR1),]
 
+# Reducing the CoGe master file to have only 'good' entries.
 slimmaster <- master[which(master$CHR2 %in% cond$scaffold),]
 
+# Matching the positions on the two master files
 connec <- match(slimmaster$CHR2,remaster$scaffold, nomatch=NULL)
 
+# ploting the positions on the two master files
 plot(1:length(connec), connec, pch=16, xlab="ordinal # in new master", ylab="position on SynMap master file", cex=1, main="ordering in master and new master file", col=colors()[as.numeric(remaster$chr)+98])
 legend(0, 2000, unique(remaster$chr), col=colors()[99:108], pch=16, ncol=5, title="E. tef Chromosome" )
 
-# Take 2nd position for outliers
-
+# Highlight the outliers and set the 2nd ranked Stretch
 outliers <- (1:length(connec))[abs((1:length(connec)) - connec) > sd((1:length(connec))- connec)]
 points(outliers, connec[outliers], pch="°", col="red", cex=2)
-
 slimmaster[outliers,2]
 
 betterlist <- cond[cond[,15]==1,]
@@ -101,13 +101,16 @@ outlierpos <- cond[cond[,5] %in% slimmaster[outliers,2],]
 outlier <- outlierpos[outlierpos[,15]==2,]
 # write.csv(cbind(outlierpos[outlierpos[,15]==2,], outlierpos[outlierpos[,15]==1,]), file="outlier12.csv")
 
-# iterate to find best position
+# Iterate over the Stretches for outliers to find best combination of positions
 
 while (length(outliers)>0) {
     for ( n in 1:max(cond[,15])) {
         itermaster <- betterlist[,c(1, 5, 12)]
         iterconnec <- match(slimmaster$CHR2, itermaster$scaffold, nomatch=NULL)
-        outliers <- (1:length(iterconnec))[abs((1:length(iterconnec)) - iterconnec) > 6 ]# sd((1:length(iterconnec))- iterconnec)]
+        # The number of accepted position shifts have to be evaluated manually
+        # The while loop can easily fall into a endless loops
+        outliers <- (1:length(iterconnec))[abs((1:length(iterconnec)) - iterconnec) > 6 ]
+        # sd((1:length(iterconnec))- iterconnec)] is not a solution
         outlierpos <- cond[cond[,5] %in% slimmaster[outliers,2],]
         outlier <- outlierpos[outlierpos[,15]==n,]
         betterlist[match(outlier$scaffold,  betterlist$scaffold),] <- outlier
@@ -116,6 +119,8 @@ while (length(outliers)>0) {
     print(paste(length(outliers)))
 }
 
+# Identify Stretches that have changed alot and
+# plot the differences of positions to the position
 updated <- (1:length(connec))[abs(iterconnec - connec) > 100]
 plot(1:length(connec), (1:length(connec))-iterconnec, pch=16, xlab="ordinal # in better master", ylab="position difference", cex=1, main="ordering in master and 'better' master file", col=colors()[as.numeric(itermaster$chr)+98])
 legend(0, 3, unique(itermaster$chr), col=colors()[99:108], pch=16, ncol=5)
@@ -123,10 +128,11 @@ points(updated, updated-iterconnec[updated], pch="°", col="green", cex=2)
 
 dev.off()
 
+# Generate a better master list and write
 bettermaster <- cbind(betterlist[,c(1:3, 5:7, 12, 13)], no=as.numeric(rownames(betterlist)), chrt=factor(rep("unmapped", dim(betterlist)[1]), levels=c("A", "B", "unmapped") ))
-
 write.table(bettermaster, file="/output/bettermaster.delim", quote=FALSE, sep="\t")
 
+# Definition of colors to display DAGchainer score
 max(as.numeric(rownames(bettermaster)))
 length(unique(bettermaster[,8]))
 gcol <- terrain_hcl(36, c=c(65,0), l=c(45, 95), power=c(1/3, 1.5))
@@ -148,7 +154,8 @@ dev.off()
 
 # Split to A and B chromosome
 
-
+# 'Random' assignement to A and B chromosome starting on A, then B the rest
+# remains unmapped.
 for (entry in 1:dim(bettermaster)[1]) {
     actchr <- bettermaster[entry, 1]
     if (sum(bettermaster$chrt=="A" & bettermaster$chr==actchr)==0) { bettermaster[entry, 10] <- "A" }
@@ -175,7 +182,7 @@ for (chrno in 1:10) {
 
 dev.off()
 
-# Bettersplit using gir
+# Bettersplit using number of genes in rows
 
 require(IRanges)
 bettermaster <- cbind(betterlist[,c(1:3, 5:7, 12, 13)], no=as.numeric(rownames(betterlist)), chrt=factor(rep("unmapped", dim(betterlist)[1]), levels=c("A", "B", "unmapped") ))
@@ -203,6 +210,7 @@ ABmasterSorted <- ABmaster[order(ABmaster[,1]*1e10+(ABmaster[,2]+ABmaster[,3])/2
 write.table(ABmasterSorted, file="/output/ABmaster_sorted.delim", quote=FALSE, sep="\t")
 ABmaster[,10] <- as.numeric(ABmaster[,10])
 
+# Calculation of how many scaffold are attributed to A and B chromosome
 table(ABmasterSorted$chrt)
 
 pdf(file=paste(getwd(),"/output/ABmaster2.pdf", sep=""), paper="a4r", width = (2967/100)/2.54, height = (2099/100)/2.54)
@@ -219,13 +227,13 @@ for (chrno in 1:10) {
 
 dev.off()
 
-# usage of IRanges
+# Tutorial for usage of IRanges
 library(IRanges)
 ranges <- IRanges(ABmaster[entry,2], ABmaster[entry,3])
 rangesA <- IRanges(ABmaster[ABmaster$chrt=="A" & ABmaster$chr==actchr, 2], ABmaster[ABmaster$chrt=="A" & ABmaster$chr==actchr, 3])
 rangesB <- IRanges(ABmaster[ABmaster$chrt=="B" & ABmaster$chr==actchr, 2], ABmaster[ABmaster$chrt=="B" & ABmaster$chr==actchr, 3])
 rangesX <- IRanges(ABmaster[ABmaster$chrt=="unmapped" & ABmaster$chr==actchr, 2], ABmaster[ABmaster$chrt=="unmapped" & ABmaster$chr==actchr, 3])
-# which rangesX contain at least one ranges?
+# Which rangesX contain at least one ranges?
 countOverlaps(ranges, rangesX, type="any")>0
 
 plotRanges <- function(x, xlim = x, main = deparse(substitute(x)), col = "black", sep = 0.5, ...) {
@@ -241,6 +249,7 @@ title(main)
 axis(1)
 }
 
+# Easy plot the occupance on the genome
 pdf(file=paste(getwd(),"/output/plotRanges.pdf", sep=""), paper="a4r", width = (2967/100)/2.54, height = (2099/100)/2.54)
 
 par(mfrow=c(2,5))
