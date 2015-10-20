@@ -199,13 +199,11 @@ for (entry in 1:dim(ABmaster)[1]) {
     }
 }
 
-
 ABmasterSorted <- ABmaster[order(ABmaster[,1]*1e10+(ABmaster[,2]+ABmaster[,3])/2),]
 write.table(ABmasterSorted, file="/output/ABmaster_sorted.delim", quote=FALSE, sep="\t")
 ABmaster[,10] <- as.numeric(ABmaster[,10])
 
 table(ABmasterSorted$chrt)
-
 
 pdf(file=paste(getwd(),"/output/ABmaster2.pdf", sep=""), paper="a4r", width = (2967/100)/2.54, height = (2099/100)/2.54)
 for (chrno in 1:10) {
@@ -220,7 +218,6 @@ for (chrno in 1:10) {
 }
 
 dev.off()
-
 
 # usage of IRanges
 library(IRanges)

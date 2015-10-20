@@ -47,9 +47,6 @@ for m in comments:
     except IndexError:
         pass
 
-# print(str(len(comment))+' '+str(len(comments))+' '+str(len(lol)))
-
-
 D = {}
 for q in range(0, len(lol)):
     """
@@ -99,9 +96,6 @@ for q in range(0, len(lol)):
         D[(str(lol[q][1]).split('||')[0])].extend(entry)
     else:
         D[(str(lol[q][1]).split('||')[0])] = entry
-# print(D['scaffold105'])
-# input()
-# print(s.encode(pwd.getpwuid(os.getuid()).pw_gecos))
 
 # Here is a code-chunk to easely import fasta files dependent on current user
 try:
@@ -120,7 +114,7 @@ except:
 
 
 # Read in all E. tef scaffolds and echos scaffold name and nucleotide sequence
-# fasta_sequences = SeqIO.parse(open(input_fileS), 'fasta')
+fasta_sequences = SeqIO.parse(open(input_fileS), 'fasta')
 
 # Read in all Sorghum chromosomes and sort chromosomes by number
 try:
@@ -136,9 +130,9 @@ except:
     else:
         input_fileC = input(
             'Please enter directory and file of Sorghum_bicolor.faa file')
-# chr_sequences = SeqIO.parse(open(input_fileC), 'fasta')
+chr_sequences = SeqIO.parse(open(input_fileC), 'fasta')
 # Sort the cromosomes numerically.
-# chr_sequences = list(sorted(chr_sequences, key=lambda x: int(x.id[3:])))
+chr_sequences = list(sorted(chr_sequences, key=lambda x: int(x.id[3:])))
 
 
 # Search scaffolds on DAGchainer document and build up hash links
@@ -153,7 +147,7 @@ print('\nTest phase over! Starting real thing: One two three')
 
 for fasta in fasta_sequences:
     try:
-        singleton = find_synthenic_block(D[fasta.id], fasta, chr_sequences)
+        singleton = find_synthenic_block(D[fasta.id], str(fasta.id))
         stretches.append(singleton[0])
         a.append(singleton[1])
     except KeyError:  # Only except for missing keys!
@@ -191,10 +185,8 @@ try:
                          str(entry.number),
                          str(entry.score), str(entry.reversion),
                          str(entry.genes_in_row), str(entry.block),
-                         str(entry.position)]  # ,
-                # str(entry.cfa), str(entry.sfa)]
+                         str(entry.position)]
                 stretchwriter.writerow(stret)
-                # stretchwriter.writerow("\# "+str(entry[0].scafname))
 except FileNotFoundError:
     print('File not found')
 
