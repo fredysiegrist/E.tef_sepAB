@@ -4,61 +4,6 @@ __author__ = 'fsiegris'
 # Date: 09.09.2015
 # Functions for tef practical.
 
-class SynMap:
-    """
-        Simple class used for raw mapping inputs without block grouping of
-        condensed output.
-    """
-
-    def __init__(self, chr, start, end, ori):
-        self.chr = chr
-        self.start = start
-        self.end = end
-        self.ori = ori
-        self.coord = (start, end)
-
-    def chr(self):
-        return self.chr
-
-    def start(self):
-        return self.start
-
-    def end(self):
-        return self.end
-
-    def ori(self):
-        return self.ori
-
-    def length(self):
-        return int((self.end - self.start) * self.ori)
-
-    def __repr__(self):
-        return repr((self.chr, (self.start, self.end), self.ori))
-
-    def __lt__(self, other):
-        (self.chr, self.start, self.end, self.ori) < (
-            other.chr, other.start, other.end, other.ori)
-
-    def __le__(self, other):
-        (self.chr, self.start, self.end, self.ori) <= (
-            other.chr, other.start, other.end, other.ori)
-
-    def __ge__(self, other):
-        (self.chr, self.start, self.end, self.ori) >= (
-            other.chr, other.start, other.end, other.ori)
-
-    def __gt__(self, other):
-        (self.chr, self.start, self.end, self.ori) > (
-            other.chr, other.start, other.end, other.ori)
-
-    def __eq__(self, other):
-        (self.chr, self.start, self.end, self.ori) == (
-            other.chr, other.start, other.end, other.ori)
-
-    def __ne__(self, other):
-        (self.chr, self.start, self.end) != (other.chr, other.start, other.end)
-
-
 class DagChain:
     """
         Class is designed to take additional information as coordinates on
@@ -190,11 +135,17 @@ class Stretch(DagChain):
     def position(self):
         return self.position
 
-    def cfa(self):
-        return __get_chr_fa(chr_sequences, self.chr, self.start, self.end)
+    def cfa(self, chrfastafile):
+        """
+        :param chrfastafile: SeqIO object with fasta information of reference genome.
+        """
+        return __get_chr_fa(chrfastafile, self.chr, self.start, self.end)
 
-    def sfa(self):
-        return __get_scaffold_fa(fasta, self.sstart, self.send)
+    def sfa(self, scafastafile):
+        """
+        :param scafastafile: SeqIO object with fasta information of scaffold.
+        """
+        return __get_scaffold_fa(scafastafile, self.sstart, self.send)
 
     def all(self):
         return (
@@ -226,8 +177,34 @@ class Stretch(DagChain):
             other.genes_in_row, other.score, other.end - other.start,
             other.send - other.sstart, other.coord, other.scoord)
 
+    def __get_scaffold_fa(self, fasta, start, end):
+        """
+        Returns a nucleotide string (fasta) between the longest
+        syntenic stretch between first and last mapped gene on tef scaffold.
+        :param fasta: SeqIO fasta object for given stretch.
+        :param start: String of lower Fasta nucleotide coordinate on scaffold.
+        :param end: String of higher Fasta nucleotide coordinate on scaffold.
+        :return: String of nucleotide sequence for stretch between mapped elements
+                 on scaffold.
+        """
+        from Bio import SeqIO, SeqFeature
+        return (str(fasta.seq[start - 1:end - 1]))
 
-def find_synthenic_block(coordlist, fa, chfa, D=12000000, mingen=3,
+    def __get_chr_fa(self, fasta, chr, start, end):
+        """
+        Returns a nucleotide string (fasta) between the longest syntenic stretch
+        between first and last mapped gene on reference genome.
+        :param fasta: SeqIO fasta object of reference genome for given stretch.
+        :param chr: String or integer of chromosome number.
+        :param start: String of higher Fasta nucleotide coordinate on chromosome.
+        :param end: String of lower Fasta nucleotide coordinate on chromosome.
+        :return: String of nucleotide sequence for stretch between mapped elements
+                 on reference genome.
+        """
+        return str(fasta[int(chr - 1)].seq[start - 1:end - 1])
+
+
+def find_synthenic_block(coordlist, scafname, D=12000000, mingen=3,
                          plot=False):
     """
     Checkes the nucleotide distance of the blocks and applies minimal genes
@@ -237,8 +214,6 @@ def find_synthenic_block(coordlist, fa, chfa, D=12000000, mingen=3,
     100XD = 12 000 000 applied to accept alternative by gene distance
     criteria used in generation of condensed list.
     :param coordlist: List of all DagChain objects for one scaffold.
-    :param fa: SeqIO Fasta object of tef scaffold.
-    :param chfa: SeqIO Fasta object of reference genomes with ordered chr.
     :param D: Integer for maximal distance between two genes for cut-off.
     :param mingen: Integer for minimal genes to form a stretch.
     :param plot: Boolean if histogram of number of genes_in_row should be
@@ -250,22 +225,8 @@ def find_synthenic_block(coordlist, fa, chfa, D=12000000, mingen=3,
     if plot:
         import matplotlib.pyplot as plt
 
-    from operator import attrgetter
-
-    # Setup of Stretch attributes.
-    scafname = str(fa.id)
-
-    # Integrity check for new version of input files (condensed).
-    typecheck = type(coordlist[0]) == type(
-        DagChain(0, 0, 0, 0, '', 0, 0, 0, 0, 0, 0, 'f', 0))
-    if typecheck:
-        entry_old = DagChain(0, 0, 0, 0, '', 0, 0, 0, 0, 0, 0, 'f', 0)
-    elif type(coordlist[0]) == type(SynMap(0, 0, 0, 0)):
-        entry_old = SynMap(0, 0, 0, 0)
-    else:
-        print('Wrong list type!')
-
     # Initiation of looping variables for new Stretch attributes.
+    entry_old = DagChain(0, 0, 0, 0, '', 0, 0, 0, 0, 0, 0, 'f', 0)
     block = 1
     genes_in_row = 1
     synthenic_hits = []
@@ -273,53 +234,37 @@ def find_synthenic_block(coordlist, fa, chfa, D=12000000, mingen=3,
     scafstart = 0
     found_stretch = []
     ecount = 0
-    # if not typecheck: # was used to sort mapped elements in old version
-    # coordlist = sorted(coordlist, key=attrgetter('chr', 'start', 'end'))
     for entry in coordlist:
-        # print(entry)
         ecount = ecount + 1
-        if typecheck:
-            # print(str(entry.chr == entry_old.chr) + str(entry_old.number ==
-            # entry.number) + str(entry_old.score == entry.score))
-            chcheck = entry.chr == entry_old.chr and entry_old.number == entry.number and entry_old.score == entry.score and entry_old.block == entry.block
-
-        else:
-            chcheck = entry.chr == entry_old.chr
+        chcheck = entry.chr == entry_old.chr and entry_old.number == entry.number and entry_old.score == entry.score and entry_old.block == entry.block
         if (  # Checks if on same chromosome or block.
               (entry_old.chr == 0 or (chcheck))):
             orient = True
-            # print(' '+str(entry.chr)+' '+str(entry_old.chr)+' \ '+
-            # str(entry.start - entry_old.end)+' '+str(entry.coord)+'-'+
-            # str(entry_old.coord)+'*'+str(entry.ori)+'*'+str(entry_old.ori)
-            # +' '+str(cordstart)+' Decision: '+str((entry.start -
-            # entry_old.end) <= D and entry.start > entry_old.start))
             if (  # Checks for distance between two mapping entries.
-                  abs(entry.start - entry_old.end) <= D and
-                          orient == True):
+                  abs(entry.start - entry_old.end) <= D):
                 genes_in_row = genes_in_row + 1
                 if (genes_in_row == 2):
                     # Sets the start coordinates for the Stretch.
                     if (entry_old.start == 0):
                         cordstart = entry.start
-                        if typecheck:
-                            if entry.reversion == 'f':
-                                scafstart = entry.sstart
-                            else:
-                                scafstart = entry.send
+                        if entry.reversion == 'f':
+                            scafstart = entry.sstart
+                        else:
+                            scafstart = entry.send
                     else:
                         cordstart = entry_old.start
-                        if typecheck:
+                        if entry.reversion == 'f':
                             scafstart = entry_old.sstart
                         else:
-                            scafstart = 0
+                            scafstart = entry_old.send
             elif (  # Checks if there are enough genes in row for a good
                     # stretch if distance criteria is no longer met.
                     entry != entry_old or entry.block != entry_old.block):
                 synthenic_hits = __found_synthenic(synthenic_hits,
                                                    genes_in_row, entry,
                                                    cordstart,
-                                                   scafname, mingen, fa,
-                                                   scafstart, block, chfa)
+                                                   scafname, mingen,
+                                                   scafstart, block)
                 # print("GATE2 " + str(entry.sori))
                 if genes_in_row >= mingen:
                     found_stretch.append(genes_in_row)
@@ -330,13 +275,12 @@ def find_synthenic_block(coordlist, fa, chfa, D=12000000, mingen=3,
             # block has changed between entries.
             synthenic_hits = __found_synthenic(synthenic_hits, genes_in_row,
                                                entry_old, cordstart,
-                                               scafname, mingen, fa, scafstart,
-                                               block, chfa)
+                                               scafname, mingen, scafstart,
+                                               block)
             # print("GATE3 " + str(entry.sori))
             if genes_in_row >= mingen:
                 found_stretch.append(genes_in_row)
             genes_in_row = 1
-            # print('chromosome jump '+str(entry_old[0])+' '+str(entry[0]))
             # Sets back the start coordinates for new block or chromosome.
             cordstart = 0
             scafstart = 0
@@ -346,8 +290,8 @@ def find_synthenic_block(coordlist, fa, chfa, D=12000000, mingen=3,
                 found_stretch.append(genes_in_row)
             synthenic_hits = __found_synthenic(synthenic_hits, genes_in_row,
                                                entry, cordstart,
-                                               scafname, mingen, fa, scafstart,
-                                               block, chfa)
+                                               scafname, mingen, scafstart,
+                                               block)
             # print("GATE1 " + str(entry.sori))
         entry_old = entry
     if plot:
@@ -358,41 +302,34 @@ def find_synthenic_block(coordlist, fa, chfa, D=12000000, mingen=3,
         plt.show()
     return (__decide_best_stretch(synthenic_hits), len(found_stretch))
 
-def __get_starts_ends(entry, cordstart, scafstart):
-    try:
-        if entry.ori == 1:
-            ori = '+'
-        else:
-            ori = '-'
-        if entry.sori == 1:
-            sori = '+'
-        else:
-            sori = '-'
-        if cordstart > entry.start:
-            end = cordstart
-            cordstart = entry.end
-        else:
-            end = entry.end
-        if scafstart > entry.sstart:
-            send = scafstart
-            scafstart = entry.send
-        else:
-            send = entry.send
-        #old chunk to get out nt sequence
-        #sequ = __get_scaffold_fa(fa, scafstart, send)
-        #chseq = __get_chr_fa(chfa, entry.chr, cordstart, end)
-        # sequence = sequ[:50] + ' ... ' + sequ[-50:]
-        # seqcoord = ' ' + str(scafstart) + ' ' + str(send)
-    except:
-        pass
-        #if (genes_in_row >= mingen):
-        #    print('Orientation not checked for!')
-        #chseq = 'NA'
-    return((ori, sori, cordstart, end, scafstart, send))
+
+def __switch_starts_ends(entry, cordstart, scafstart):
+    """
+    Sets strings for easy readability of orientations and switch start and
+    end coordinates in reversed block occurence.
+    :param entry: Last DagChain entry in successful check.
+    :param cordstart: Recorded start of the stretch.
+    :param scafstart: Recorded start of the scaffold.
+    :return: Tuple of ori strings and start/end coordinates
+    """
+    oridict = {1: '+', -1: '-'}
+    ori = oridict[entry.ori]
+    sori = oridict[entry.sori]
+    if cordstart > entry.start:
+        end = cordstart
+        cordstart = entry.end
+    else:
+        end = entry.end
+    if scafstart > entry.sstart:
+        send = scafstart
+        scafstart = entry.send
+    else:
+        send = entry.send
+    return ((ori, sori, cordstart, end, scafstart, send))
 
 
 def __found_synthenic(synthenic_hits, genes_in_row, entry,
-                      cordstart, scafname, mingen, fa, scafstart, block, chfa):
+                      cordstart, scafname, mingen, scafstart, block):
     """
     Determines the start and end coordinates on the scaffold dependent on
     whether the block entrie was reversed or not and checkes if the
@@ -404,61 +341,23 @@ def __found_synthenic(synthenic_hits, genes_in_row, entry,
     :param cordstart: Integer with start position of stretch on reference.
     :param scafname: String with current tef scaffold name.
     :param mingen: Integer of minimal genes in row criteria.
-    :param fa: SeqIO object with fasta information of scaffold.
     :param scafstart: Integer with start or end coordinate on scaffold.
     :param block: Integer counting the current block the DagChain elements are
                   coming from
-    :param chfa: SeqIO object with fasta information of reference genome.
-    :return:
+    :return: Appended list of Stretch objects (1. attribute).
     """
     if (genes_in_row >= mingen):
-        """
-        print('got ' + str(
-            genes_in_row) +
-              '-genes stretch of synthenic genes on chromosome ' + str(
-            entry.chr) + ' coordinates start: ' + str(
-            cordstart) + ' end: ' + str(
-            entry.end) + ' on ' + scafname + ' in ' + sori + ori +
-            ' orientation:\n' + sequence + seqcoord + ' '+ str(block))
-        """
-        (ori, sori, cordstart, end, scafstart, send) = __get_starts_ends(entry, cordstart, scafstart)
+        (ori, sori, cordstart, end, scafstart, send) = __switch_starts_ends(
+            entry, cordstart, scafstart)
         goodstretch = Stretch(
             DagChain(entry.chr, cordstart, end,
-                     entry.ori, scafname, scafstart,
-                     send, entry.sori,
+                     ori, scafname, scafstart,
+                     send, sori,
                      entry.stretch, entry.number,
                      entry.score, entry.reversion, entry.block),
             genes_in_row, block, 0)
         synthenic_hits.append(goodstretch)
     return synthenic_hits
-
-
-def __get_scaffold_fa(fasta, start, end):
-    """
-    Returns a nucleotide string (fasta) between the longest
-    syntenic stretch between first and last mapped gene on tef scaffold.
-    :param fasta: SeqIO fasta object for given stretch.
-    :param start: String of lower Fasta nucleotide coordinate on scaffold.
-    :param end: String of higher Fasta nucleotide coordinate on scaffold.
-    :return: String of nucleotide sequence for stretch between mapped elements
-             on scaffold.
-    """
-    from Bio import SeqIO, SeqFeature
-    return (str(fasta.seq[start - 1:end - 1]))
-
-
-def __get_chr_fa(fasta, chr, start, end):
-    """
-    Returns a nucleotide string (fasta) between the longest syntenic stretch
-    between first and last mapped gene on reference genome.
-    :param fasta: SeqIO fasta object of reference genome for given stretch.
-    :param chr: String or integer of chromosome number.
-    :param start: String of higher Fasta nucleotide coordinate on chromosome.
-    :param end: String of lower Fasta nucleotide coordinate on chromosome.
-    :return: String of nucleotide sequence for stretch between mapped elements
-             on reference genome.
-    """
-    return str(fasta[int(chr - 1)].seq[start - 1:end - 1])
 
 
 def __decide_best_stretch(listofstretches):
@@ -471,7 +370,7 @@ def __decide_best_stretch(listofstretches):
     p = 0
     sortedstretchlist = []
     for entry in sorted(listofstretches,
-                        key=attrgetter('genes_in_row', 'score', 'len',
+                        key=attrgetter('score', 'genes_in_row', 'len',
                                        'slen', 'coord', 'scoord', 'end'),
                         reverse=False):
         p = p + 1
