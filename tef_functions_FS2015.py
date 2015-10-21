@@ -45,21 +45,6 @@ class DagChain:
     def length(self):
         return int((self.end - self.start) * self.ori)
 
-    def chr(self):
-        return self.chr
-
-    def start(self):
-        return self.start
-
-    def end(self):
-        return self.end
-
-    def ori(self):
-        return self.ori
-
-    def length(self):
-        return int((self.end - self.start) * self.ori)
-
     def scaffold(self):
         return self.scaffold
 
@@ -139,13 +124,14 @@ class Stretch(DagChain):
         """
         :param chrfastafile: SeqIO object with fasta information of reference genome.
         """
-        return __get_chr_fa(chrfastafile, self.chr, self.start, self.end)
+        return str(
+            chrfastafile[int(self.chr - 1)].seq[self.start - 1:self.end - 1])
 
     def sfa(self, scafastafile):
         """
         :param scafastafile: SeqIO object with fasta information of scaffold.
         """
-        return __get_scaffold_fa(scafastafile, self.sstart, self.send)
+        return (str(scafastafile.seq[self.sstart - 1:self.send - 1]))
 
     def all(self):
         return (
@@ -160,6 +146,16 @@ class Stretch(DagChain):
                      self.len,
                      self.slen, self.chr, self.coord, self.scaffold,
                      self.scoord))
+    def aslist(self):
+        return [str(self.chr), str(self.start), str(self.end),
+                      str(self.ori),
+                      str(self.scaffold), str(self.sstart),
+                      str(self.send),
+                      str(self.sori), str(self.stretch),
+                      str(self.number),
+                      str(self.score), str(self.reversion),
+                      str(self.genes_in_row), str(self.block),
+                      str(self.position)]
 
     def str(self):
         return ('got ' + str(
@@ -176,32 +172,6 @@ class Stretch(DagChain):
          self.send - self.sstart, self.coord, self.scoord) < (
             other.genes_in_row, other.score, other.end - other.start,
             other.send - other.sstart, other.coord, other.scoord)
-
-    def __get_scaffold_fa(self, fasta, start, end):
-        """
-        Returns a nucleotide string (fasta) between the longest
-        syntenic stretch between first and last mapped gene on tef scaffold.
-        :param fasta: SeqIO fasta object for given stretch.
-        :param start: String of lower Fasta nucleotide coordinate on scaffold.
-        :param end: String of higher Fasta nucleotide coordinate on scaffold.
-        :return: String of nucleotide sequence for stretch between mapped elements
-                 on scaffold.
-        """
-        from Bio import SeqIO, SeqFeature
-        return (str(fasta.seq[start - 1:end - 1]))
-
-    def __get_chr_fa(self, fasta, chr, start, end):
-        """
-        Returns a nucleotide string (fasta) between the longest syntenic stretch
-        between first and last mapped gene on reference genome.
-        :param fasta: SeqIO fasta object of reference genome for given stretch.
-        :param chr: String or integer of chromosome number.
-        :param start: String of higher Fasta nucleotide coordinate on chromosome.
-        :param end: String of lower Fasta nucleotide coordinate on chromosome.
-        :return: String of nucleotide sequence for stretch between mapped elements
-                 on reference genome.
-        """
-        return str(fasta[int(chr - 1)].seq[start - 1:end - 1])
 
 
 def find_synthenic_block(coordlist, scafname, D=12000000, mingen=3,
@@ -377,3 +347,95 @@ def __decide_best_stretch(listofstretches):
         entry.position = p
         sortedstretchlist.append(entry)
     return (sortedstretchlist)
+
+
+def documentNames():
+    """
+    Sets the directories and file names for input and output
+    :return: Tuple of strings: dagfile, output_file, input_fileS, input_fileC
+    """
+    import pwd, os, sys
+
+    try:
+        dagFile = sys.argv[1]
+    except IndexError:
+        if os.getuid() == 1000 or pwd.getpwuid(
+                os.getuid()).pw_gecos == 'fsiegris':
+            dagFile = '../../i1sz/22790_24796.CDS-CDS.last.tdd10.cs0.filtered.dag.all.go_D20_g10_A3.aligncoords.gcoords.condensed'
+        elif pwd.getpwuid(
+                os.getuid()).pw_gecos == 'Fredy Siegrist,,,' or pwd.getpwuid(
+            os.getuid()).pw_gecos == 'Gina Cannarozzi,,,':
+            dagFile = '/home/fredy/i1sz/22790_24796.CDS-CDS.last.tdd10.cs0.filtered.dag.all.go_D20_g10_A3.aligncoords.gcoords.condensed'
+        else:
+            dagFile = input(
+                'Please enter directory and file of \
+                *.dag.all.go_D20_g10_A3.aligncoords.gcoords.condensed file')
+
+    # Here is a code-chunk to easely import fasta files dependent on current user
+    try:
+        inputFileS = sys.argv[3]
+    except:
+        if os.getuid() == 1000 or pwd.getpwuid(
+                os.getuid()).pw_gecos == 'fsiegris':
+            inputFileS = '/windows/GNYt98ter.41.closedgt1000.sorted'
+        elif pwd.getpwuid(
+                os.getuid()).pw_gecos == 'Fredy Siegrist,,,' or pwd.getpwuid(
+            os.getuid()).pw_gecos == 'Gina Cannarozzi,,,':
+            inputFileS = '/home/fredy/i1sz/GNYt98ter.41.closedgt1000.sorted'
+        else:
+            inputFileS = input(
+                'Please enter directory and file of GNYt98ter.41.closedgt1000.sorted file')
+    try:
+        inputFileC = sys.argv[4]
+    except IndexError:
+        if os.getuid() == 1000 or pwd.getpwuid(
+                os.getuid()).pw_gecos == 'fsiegris':
+            inputFileC = '/debian/Sorghum_bicolor.faa'
+        elif pwd.getpwuid(
+                os.getuid()).pw_gecos == 'Fredy Siegrist,,,' or pwd.getpwuid(
+            os.getuid()).pw_gecos == 'Gina Cannarozzi,,,':
+            inputFileC = '/home/fredy/i1sz/Sorghum_bicolor.faa'
+        else:
+            inputFileC = input(
+                'Please enter directory and file of Sorghum_bicolor.faa file')
+
+    try:
+        outputFile = sys.argv[2]
+    except IndexError:
+        if os.getuid() == 1000 or pwd.getpwuid(
+                os.getuid()).pw_gecos == 'fsiegris':
+            outputFile = '../../i1sz/stretches_condensed_ac.csv'
+        elif pwd.getpwuid(
+                os.getuid()).pw_gecos == 'Fredy Siegrist,,,' or pwd.getpwuid(
+            os.getuid()).pw_gecos == 'Gina Cannarozzi,,,':
+            outputFile = '/home/fredy/i1sz/stretches_condensed_ac.csv'
+        else:
+            outputFile = input(
+                'Please enter directory and file for output')
+
+    return (dagFile, outputFile, inputFileS, inputFileC)
+
+def dagList(x, lol, comment):
+    """
+    Extract list element and returns single element list of DagChain Object
+    :param x: line counter
+    :param lol: List of lists from condensed file
+    :param comment: Multiplied Comment list from condensed file
+    :return: List (1 element) of DagChain
+    """
+    return [DagChain(
+            int(str(lol[x][5]).split('||')[0]),  # chr
+            int(str(lol[x][5]).split('||')[1]),  # start
+            int(str(lol[x][5]).split('||')[2]),  # end
+            int(str(lol[x][5]).split('||')[4]),  # ori
+            str(lol[x][1]).split('||')[0],  # scaffold
+            int(str(lol[x][1]).split('||')[1]),  # sstart
+            int(str(lol[x][1]).split('||')[2]),  # send
+            int(str(lol[x][1]).split('||')[4]),  # sori
+            int(comment[x][5]),  # stretch
+            int(str(comment[x][0])[1]),  # number
+            1 / float(comment[x][1]),  # score
+            str(comment[x][4]),  # reversion
+            int(comment[x][6])  # block
+        )
+    ]

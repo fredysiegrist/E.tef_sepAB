@@ -3,37 +3,35 @@ __author__ = 'fsiegris'
 # Title -- Analysis functions -for- statistical analyses of tef scaffold
 # matches 'condensed' from CoGe's SynMap on Sorghum chromosomes
 
-import csv, pwd, os, sys
+import csv
 
-from Bio import SeqIO, SeqFeature
+from Bio import SeqIO
+from numpy import histogram
 import matplotlib.pyplot as plt
 
 from tef_functions_FS2015 import *
 
-try:
-    dagfile = sys.argv[1]
-except:
-    if os.getuid() == 1000 or pwd.getpwuid(
-            os.getuid()).pw_gecos == 'fsiegris':
-        dagfile = '../../i1sz/22790_24796.CDS-CDS.last.tdd10.cs0.filtered.dag.all.go_D20_g10_A3.aligncoords.gcoords.condensed'
-    elif pwd.getpwuid(
-            os.getuid()).pw_gecos == 'Fredy Siegrist,,,' or pwd.getpwuid(
-        os.getuid()).pw_gecos == 'Gina Cannarozzi,,,':
-        dagfile = '/home/fredy/i1sz/22790_24796.CDS-CDS.last.tdd10.cs0.filtered.dag.all.go_D20_g10_A3.aligncoords.gcoords.condensed'
-    else:
-        dagfile = input(
-            'Please enter directory and file of \
-            *.dag.all.go_D20_g10_A3.aligncoords.gcoords.condensed file')
+# Setting Debug parameters
+printLastSingleton = False
+plotHist = True
+
+# Loading Data
+# Check for console arguments, then UserIDs then ask for input.
+(dagfile, output_file, input_fileS, input_fileC) = documentNames()
+
+# Read-in CoGe SynMap condensed file as list of lists.
 lol = list(csv.reader(filter(lambda row: row[0] != '#', open(
     dagfile,
     'r'
 )), delimiter='\t'))
 
+# Read in the comment lines from condensed CoGe file
 comments = list(csv.reader(filter(lambda row: row[0] == '#', open(
     dagfile,
     'r'
 )), delimiter='\t'))
 
+# Duplicate each comment row for every entry.
 comment = []
 block = 1
 for m in comments:
@@ -47,153 +45,83 @@ for m in comments:
     except IndexError:
         pass
 
+# Search scaffolds on DAGchainer document and build up hash links
+# to the fasta file nucleotide information.
 D = {}
 for q in range(0, len(lol)):
     """
     The 'r' entries are extended in reverse order.
     """
     if str(comment[q][4]) == 'f':
-        entry = [DagChain(
-            int(str(lol[q][5]).split('||')[0]),  # chr
-            int(str(lol[q][5]).split('||')[1]),  # start
-            int(str(lol[q][5]).split('||')[2]),  # end
-            int(str(lol[q][5]).split('||')[4]),  # ori
-            str(lol[q][1]).split('||')[0],  # scaffold
-            int(str(lol[q][1]).split('||')[1]),  # sstart
-            int(str(lol[q][1]).split('||')[2]),  # send
-            int(str(lol[q][1]).split('||')[4]),  # sori
-            int(comment[q][5]),  # stretch
-            int(str(comment[q][0])[1]),  # number
-            1 / float(comment[q][1]),  # score
-            str(comment[q][4]),  # reversion
-            int(comment[q][6])  # block
-        )
-        ]
+        entry = dagList(q, lol, comment)
     elif str(comment[q][4]) == 'r':
+        # Read the block from the last entry to the first
         if q == 0 or str(comment[q]) != str(comment[q - 1]):  # new block
-            s = int(comment[q][5]) - 1
+            s = int(comment[q][5]) - 1  # start with last
         else:
-            s = s - 2
-        # print(str(s)+'\t'+'\t'.join(comment[q]))
-        r = q + s
-        entry = [DagChain(
-            int(str(lol[r][5]).split('||')[0]),  # chr
-            int(str(lol[r][5]).split('||')[1]),  # start
-            int(str(lol[r][5]).split('||')[2]),  # end
-            int(str(lol[r][5]).split('||')[4]),  # ori
-            str(lol[r][1]).split('||')[0],  # scaffold
-            int(str(lol[r][1]).split('||')[1]),  # sstart
-            int(str(lol[r][1]).split('||')[2]),  # send
-            int(str(lol[r][1]).split('||')[4]),  # sori
-            int(comment[q][5]),  # stretch
-            int(str(comment[q][0])[1]),  # number
-            1 / float(comment[q][1]),  # score
-            str(comment[q][4]),  # reversion
-            int(comment[q][6])  # block
-        )
-        ]
+            s = s - 2  # get to the entry before
+        r = q + s  # step back one per one
+        entry = dagList(r, lol, comment)
     if str(lol[q][1]).split('||')[0] in D:
         D[(str(lol[q][1]).split('||')[0])].extend(entry)
     else:
         D[(str(lol[q][1]).split('||')[0])] = entry
 
-# Here is a code-chunk to easely import fasta files dependent on current user
-try:
-    input_fileS = sys.argv[3]
-except:
-    if os.getuid() == 1000 or pwd.getpwuid(
-            os.getuid()).pw_gecos == 'fsiegris':
-        input_fileS = '/windows/GNYt98ter.41.closedgt1000.sorted'
-    elif pwd.getpwuid(
-            os.getuid()).pw_gecos == 'Fredy Siegrist,,,' or pwd.getpwuid(
-        os.getuid()).pw_gecos == 'Gina Cannarozzi,,,':
-        input_fileS = '/home/fredy/i1sz/GNYt98ter.41.closedgt1000.sorted'
-    else:
-        input_fileS = input(
-            'Please enter directory and file of GNYt98ter.41.closedgt1000.sorted file')
-
-
 # Read in all E. tef scaffolds and echos scaffold name and nucleotide sequence
 fasta_sequences = SeqIO.parse(open(input_fileS), 'fasta')
 
 # Read in all Sorghum chromosomes and sort chromosomes by number
-try:
-    input_fileC = sys.argv[4]
-except:
-    if os.getuid() == 1000 or pwd.getpwuid(
-            os.getuid()).pw_gecos == 'fsiegris':
-        input_fileC = '/debian/Sorghum_bicolor.faa'
-    elif pwd.getpwuid(
-            os.getuid()).pw_gecos == 'Fredy Siegrist,,,' or pwd.getpwuid(
-        os.getuid()).pw_gecos == 'Gina Cannarozzi,,,':
-        input_fileC = '/home/fredy/i1sz/Sorghum_bicolor.faa'
-    else:
-        input_fileC = input(
-            'Please enter directory and file of Sorghum_bicolor.faa file')
 chr_sequences = SeqIO.parse(open(input_fileC), 'fasta')
+
 # Sort the cromosomes numerically.
 chr_sequences = list(sorted(chr_sequences, key=lambda x: int(x.id[3:])))
 
-
-# Search scaffolds on DAGchainer document and build up hash links
-# to the fasta file nucleotide information
-from numpy import histogram
-
+# Setup:
 missmatch = 0
 a = []
 stretches = []
+scaf_fasta = {}
 
-print('\nTest phase over! Starting real thing: One two three')
+# Loading fasta sequences in SynMap file to dictionary
+# and find synthenic Stretch and decide on best one.
+
+print('\nLoading over! Starting Stretch search')
 
 for fasta in fasta_sequences:
     try:
+        # Try to find scaffold name in dictionary of CoGe DagChain and
+        # build up list of stretches found
         singleton = find_synthenic_block(D[fasta.id], str(fasta.id))
         stretches.append(singleton[0])
         a.append(singleton[1])
-    except KeyError:  # Only except for missing keys!
+        # build up fasta dictionary with known scaffold ids
+        scaf_fasta[fasta.id] = fasta
+    except KeyError:  # Except for missing keys in CoGe file and count !
         missmatch = missmatch + 1
 
+if printLastSingleton:  # Check class module for sequence information.
+    print('Chr ' + singleton[0][0].cfa(chr_sequences))
+    print('Sca ' + singleton[0][0].sfa(scaf_fasta[singleton[0][0].scaffold]))
+
+# Report histogram data
 print('\nNumber of not matched scaffolds: ' + str(missmatch))
 print(histogram(a, bins=[0, 1, 2, 3, 4, 5, 10, 20, 100]))
 
 # Save Stretch-list in a file for R import.
-# Read in all Sorghum chromosomes and sort chromosomes by number
-try:
-    output_file = sys.argv[2]
-except:
-    if os.getuid() == 1000 or pwd.getpwuid(
-            os.getuid()).pw_gecos == 'fsiegris':
-        output_file = '../../i1sz/stretches_condensed_12mio_scoreFirst.csv'
-    elif pwd.getpwuid(
-            os.getuid()).pw_gecos == 'Fredy Siegrist,,,' or pwd.getpwuid(
-        os.getuid()).pw_gecos == 'Gina Cannarozzi,,,':
-        output_file = '/home/fredy/i1sz/stretches_condensed_new.csv'
-    else:
-        output_file = input(
-            'Please enter directory and file for output')
 try:
     with open(output_file, 'w') as csvfile:
         stretchwriter = csv.writer(csvfile, delimiter='\t',
                                    quotechar='|', quoting=csv.QUOTE_MINIMAL)
         for stretch in stretches:
             for entry in stretch:
-                stret = [str(entry.chr), str(entry.start), str(entry.end),
-                         str(entry.ori),
-                         str(entry.scaffold), str(entry.sstart),
-                         str(entry.send),
-                         str(entry.sori), str(entry.stretch),
-                         str(entry.number),
-                         str(entry.score), str(entry.reversion),
-                         str(entry.genes_in_row), str(entry.block),
-                         str(entry.position)]
-                stretchwriter.writerow(stret)
+                stretchwriter.writerow(entry.aslist())
 except FileNotFoundError:
     print('File not found')
 
 # Plot a histogram of how many stretches have been found on different scaffolds
-
-plt.hist(a)
-plt.title("Histogram")
-plt.xlabel("3+ genes stretches in scaffold")
-plt.ylabel("Frequency")
-plt.show()
+if plotHist:
+    plt.hist(a)
+    plt.title("Histogram")
+    plt.xlabel("3+ genes stretches in scaffold")
+    plt.ylabel("Frequency")
+    plt.show()
