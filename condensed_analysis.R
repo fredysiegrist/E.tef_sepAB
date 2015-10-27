@@ -16,7 +16,8 @@ statdir <- file.path("output")
 
 
 # Loading the file
-cond <- read.delim(file="stretches_condensed_ac.csv", header=FALSE, skip=0, comment.char = "")
+cond <- read.delim(file="output.scoreminus1/stretches_condensed_12mio_scoreFirst.csv", header=FALSE, skip=0, comment.char = "")
+# cond <- read.delim(file="stretches_condensed_ac.csv", header=FALSE, skip=0, comment.char = "")
 colnames(cond) <- c("chr", "start", "end", "ori", "scaffold", "sstart", "send", "sori", "stretch", "number", "score", "reversion", "gir", "block", "position")
 cond$scaffold <- as.character(cond$scaffold)
 chrlen <- c(73840612, 77932577, 74440842, 68034345, 62352331, 62208772, 64342021, 55460251, 59635592, 60981625)
@@ -81,44 +82,89 @@ legend(0, 2000, unique(remaster$chr), col=colors()[99:108], pch=16, ncol=5, titl
 # Highlight the outliers and set the 2nd ranked Stretch
 outliers <- (1:length(connec))[abs((1:length(connec)) - connec) > sd((1:length(connec))- connec)]
 points(outliers, connec[outliers], pch="°", col="red", cex=2)
-slimmaster[outliers,2]
 
 betterlist <- cond[cond[,15]==1,]
 outlierpos <- cond[cond[,5] %in% slimmaster[outliers,2],]
-
 outlier <- outlierpos[outlierpos[,15]==2,]
 # write.csv(cbind(outlierpos[outlierpos[,15]==2,], outlierpos[outlierpos[,15]==1,]), file="outlier12.csv")
 
 # Iterate over the Stretches for outliers to find best combination of positions
 
-while (length(outliers)>0) {
-    for ( n in 1:max(cond[,15])) {
-        itermaster <- betterlist[,c(1, 5, 12)]
-        iterconnec <- match(slimmaster$CHR2, itermaster$scaffold, nomatch=NULL)
-        # The number of accepted position shifts have to be evaluated manually
-        # The while loop can easily fall into a endless loops
-        outliers <- (1:length(iterconnec))[abs((1:length(iterconnec)) - iterconnec) > 6 ]
-        # sd((1:length(iterconnec))- iterconnec)] is not a solution
-        outlierpos <- cond[cond[,5] %in% slimmaster[outliers,2],]
-        outlier <- outlierpos[outlierpos[,15]==n,]
-        betterlist[match(outlier$scaffold,  betterlist$scaffold),] <- outlier
-        betterlist <- betterlist[order((betterlist[,1]*1e10)+betterlist[,2]+betterlist[,3]),]
-    }
-    print(paste(length(outliers)))
+# overall penalty of the last 500 steps set to 500:1
+# poor man algorithm
+
+betterlist <- cond[cond[,15]==1,]
+betterlist <- betterlist[order((betterlist[,1]*1e10)+betterlist[,2]+betterlist[,3]),]
+best <- match(paste(betterlist$scaffold, betterlist$position), paste(cond$scaffold, cond$position))
+itermaster <- betterlist[,c(1, 5, 12)]
+iterconnec <- match(slimmaster$CHR2, itermaster$scaffold, nomatch=NULL)
+diffs <- (1:length(iterconnec)) - iterconnec
+penalty <- sum(diffs^2)
+pos_diff <- 500:1
+counter <- 0
+i <- 0
+bestsquare <- 1E10
+betterscore <- sum(betterlist$score)
+mincounter <- NULL
+while (counter < 2501 && length(unique(pos_diff))>1) {
+    oldpenalty <- penalty
+    # sample from an array of at least 2 in length!
+    worst <- sample(c(rep(which(abs(diffs) %in% max(abs(diffs))), max(c(1,var(diffs)))), sample(which(abs(diffs) %in% 1:max(abs(diffs))), max(c(1, sd(diffs)))), sample(dim(slimmaster)[1],3)),1)
+    alternativestretches <- cond[cond[,5] %in% slimmaster[worst,2],]
+    pos <- match(alternativestretches$scaffold[1],  betterlist$scaffold)
+    # find the best position
+    ifelse (betterlist[pos,15]==max(alternativestretches[,15]), nextStretch <- 1, nextStretch <- (betterlist[pos,15]+1) )
+    betterlist[pos,] <- alternativestretches[alternativestretches[,15]==nextStretch,]
+    betterlist <- betterlist[order((betterlist[,1]*1e10)+betterlist[,2]+betterlist[,3]+rnorm(1, 10000, 10000)),]
+    itermaster <- betterlist[,c(1, 5, 12)]
+    iterconnec <- match(slimmaster$CHR2, itermaster$scaffold, nomatch=NULL)
+    diffs <- (1:length(iterconnec)) - iterconnec
+    penalty <- sum(diffs^2)
+    # Feed the new difference to the end of the 500 last differences.
+    if((oldpenalty - penalty)>0) {
+        pos_diff <- c(pos_diff[2:500], oldpenalty - penalty)
+        }
+    # Save best positions for reloading if the algorithm get lost.
+    if ( penalty < bestsquare | (penalty <= bestsquare & sum(betterlist$score) < betterscore)) { # & pos_diff[500] == min(pos_diff)
+        ifelse(best == match(paste(betterlist$scaffold, betterlist$position), paste(cond$scaffold, cond$position)),  i <- i+1, {betterscore <- sum(betterlist$score); best <- match(paste(betterlist$scaffold, betterlist$position), paste(cond$scaffold, cond$position)); print(paste('saved', penalty, betterscore, counter, i)); i <- 0; bestsquare <- penalty})
+        plotdiff(betterlist, best, slimmaster, connec, bestsquare)
+        }
+    # Check if the best improvement was 500 cycles ago and reload randomly.
+    else {
+        if (pos_diff[1] == min(pos_diff)) {
+            counter <- counter + 1
+            if (sample(10, 1)==1) {
+                betterlist <- cond[best,]
+                print(paste('loaded', bestsquare, counter))
+                betterlist <- cond[best,]
+                print(quantile(mincounter))
+                mincounter <- NULL
+                }
+            mincounter <- cbind(mincounter, penalty)
+            }
+        }
 }
 
-# Identify Stretches that have changed alot and
-# plot the differences of positions to the position
-updated <- (1:length(connec))[abs(iterconnec - connec) > 100]
-plot(1:length(connec), (1:length(connec))-iterconnec, pch=16, xlab="ordinal # in better master", ylab="position difference", cex=1, main="ordering in master and 'better' master file", col=colors()[as.numeric(itermaster$chr)+98])
-legend(0, 3, unique(itermaster$chr), col=colors()[99:108], pch=16, ncol=5)
-points(updated, updated-iterconnec[updated], pch="°", col="green", cex=2)
+# Best stretch found for maximal unsorted list:
+# "saved 356 11.9898162029453 2459 1" for 2501  --> true 11.9898162029453
+# Best stretch found for maximal sorted list:
+# "saved 352 11.984250405871 2440 1" --> true 11.9956951011839 can't be !!!!
 
+# reorder them to calculate 'true' sum 1/DAGscore
+betterlist <- cond[best,]
+betterlist <- betterlist[order((betterlist[,1]*1e10)+betterlist[,2]+betterlist[,3]),]
+itermaster <- betterlist[,c(1, 5, 12)]
+iterconnec <- match(slimmaster$CHR2, itermaster$scaffold, nomatch=NULL)
+diffs <- (1:length(iterconnec)) - iterconnec
+penalty <- sum(diffs^2)
+( betterscore <- sum(betterlist$score) )
+
+plotdiff(betterlist, best, slimmaster, connec, bestsquare)
 dev.off()
 
 # Generate a better master list and write
 bettermaster <- cbind(betterlist[,c(1:3, 5:7, 12, 13)], no=as.numeric(rownames(betterlist)), chrt=factor(rep("unmapped", dim(betterlist)[1]), levels=c("A", "B", "unmapped") ))
-write.table(bettermaster, file="/output/bettermaster.delim", quote=FALSE, sep="\t")
+write.table(bettermaster, file="output/bettermaster_maxsorted.delim", quote=FALSE, sep="\t")
 
 # Definition of colors to display DAGchainer score
 max(as.numeric(rownames(bettermaster)))
@@ -130,7 +176,7 @@ girorder <- girs[order(unique(bettermaster[,8]))]
 transmatrix <- cbind(unique(bettermaster[,8]), order(girorder, decreasing = TRUE))
 gircol[transmatrix[,1]] <- gcol[transmatrix[,2]]
 
-pdf(file=paste(getwd(),"/output/bettrmaster.pdf", sep=""), paper="a4r", width = (2967/100)/2.54, height = (2099/100)/2.54)
+pdf(file=paste(getwd(),"/output/bettrmaster_maxsorted.pdf", sep=""), paper="a4r", width = (2967/100)/2.54, height = (2099/100)/2.54)
 
 par(mfrow=c(2,5))
 for (chrno in 1:10) {
@@ -157,7 +203,7 @@ for (entry in 1:dim(bettermaster)[1]) {
 
 bettermaster[,10] <- as.numeric(bettermaster[,10])
 
-pdf(file=paste(getwd(),"/output/firstAB.pdf", sep=""), paper="a4r", width = (2967/100)/2.54, height = (2099/100)/2.54)
+pdf(file=paste(getwd(),"/output/firstAB_maxsorted.pdf", sep=""), paper="a4r", width = (2967/100)/2.54, height = (2099/100)/2.54)
 for (chrno in 1:10) {
     plot(seq(1, chrlen[chrno], length.out=5), (0:4), type='n', sub=paste("chr #",chrno), xlab="nt", ylab="scaffolds", main="Randomly attributed E. tef scaffolds to A/B/umapped on Sorghum chromosomes")
     apply(bettermaster[bettermaster$chr==chrno, c(2:3,8,10)], 1, function(z) {n<-jitter(as.numeric(z[4]), 5); x<- z[1:2]; y<-c(n,n); colr <- gircol[z[3]]; lines(x, y, col=colr, lwd=5)})
@@ -195,13 +241,15 @@ for (entry in 1:dim(ABmaster)[1]) {
 }
 
 ABmasterSorted <- ABmaster[order(ABmaster[,1]*1e10+(ABmaster[,2]+ABmaster[,3])/2),]
-write.table(ABmasterSorted, file="/output/ABmaster_sorted.delim", quote=FALSE, sep="\t")
+write.table(ABmasterSorted, file="output/ABmaster_maxsorted.delim", quote=FALSE, sep="\t")
 ABmaster[,10] <- as.numeric(ABmaster[,10])
 
 # Calculation of how many scaffold are attributed to A and B chromosome
 table(ABmasterSorted$chrt)
+print(nttable(ABmaster))
+for (i in 1:10) print(nttable(ABmaster[ABmaster[,1]==i,]))
 
-pdf(file=paste(getwd(),"/output/ABmaster2.pdf", sep=""), paper="a4r", width = (2967/100)/2.54, height = (2099/100)/2.54)
+pdf(file=paste(getwd(),"/output/ABmaster2_maxsorted.pdf", sep=""), paper="a4r", width = (2967/100)/2.54, height = (2099/100)/2.54)
 for (chrno in 1:10) {
     plot(seq(1, chrlen[chrno], length.out=5), (0:4), type='n', sub=paste("chr #",chrno), xlab="nt", ylab="scaffolds", main="Randomly attributed E. tef scaffolds to A/B/umapped on Sorghum chromosomes")
     apply(ABmaster[ABmaster$chr==chrno, c(2:3,8,10)], 1, function(z) {n<-jitter(as.numeric(z[4]), 5); x<- z[1:2]; y<-c(n,n); colr <- gircol[z[3]]; lines(x, y, col=colr, lwd=5)})

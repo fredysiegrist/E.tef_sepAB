@@ -2,6 +2,7 @@
 #date -- 09.09.2015
 #title -- Analysis functions -for- statistical analyses of tef scaffold matches from CoGe's SynMap on Sorghum chromosomes
 
+# Some basic ploting functions for tef genome analysis.
 
 # compute fold changes from log fold changes -- for testing purpose
 
@@ -30,3 +31,22 @@ for (chrno in chromosomes) {
     apply(data[data$chr==chrno, c(2:3,15)], 1, function(z) {n<-sample(1:chrlen[chrno],1); x<- z[1:2]; y<-c(n,n); colr <- ink[z[3]]; lines(x, y, col=colr, lwd=2)})
     }
 }
+
+# plot the differences of positions to the position
+plotdiff <- function(betterlist, best, slimmaster, connec, penalty) {
+    betterlist <- cond[best,]
+    itermaster <- betterlist[,c(1, 5, 12)]
+    iterconnec <- match(slimmaster$CHR2, itermaster$scaffold, nomatch=NULL)
+    diffs <- (1:length(iterconnec)) - iterconnec
+    plot(1:length(connec), (1:length(connec))-iterconnec, pch=16, xlab="ordinal # in better master", ylab="position difference", cex=1, main=paste("ordering in master and ", penalty, "master file"), col=colors()[as.numeric(itermaster$chr)+98])
+    }
+
+# Calculation of how many nucleotides are attributed to A and B chromosome,
+# allowing counting for each reference chromosome separately.
+
+nttable <- function(data) {
+ m<-cbind('A'=sum(data[data[,10]==1,6])-sum(data[data[,10]==1,5]),
+'B'=sum(data[data[,10]==2,6])-sum(data[data[,10]==2,5]),
+'unmapped'=sum(data[data[,10]==3,6])-sum(data[data[,10]==3,5]) )
+rownames(m) <- as.character(i)
+ return(m) }
