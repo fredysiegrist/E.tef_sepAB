@@ -44,9 +44,9 @@ plotdiff <- function(betterlist, best, slimmaster, connec, penalty) {
 # Calculation of how many nucleotides are attributed to A and B chromosome,
 # allowing counting for each reference chromosome separately.
 
-nttable <- function(data) {
+nttable <- function(data, rowlabel=Inf) {
  m<-cbind('A'=sum(data[data[,10]==1,6])-sum(data[data[,10]==1,5]),
 'B'=sum(data[data[,10]==2,6])-sum(data[data[,10]==2,5]),
 'unmapped'=sum(data[data[,10]==3,6])-sum(data[data[,10]==3,5]) )
-rownames(m) <- as.character(i)
+rownames(m) <- as.character(rowlabel)
  return(m) }

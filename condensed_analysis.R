@@ -146,9 +146,9 @@ while (counter < 2501 && length(unique(pos_diff))>1) {
 }
 
 # Best stretch found for maximal unsorted list:
-# "saved 356 11.9898162029453 2459 1" for 2501  --> true 11.9898162029453
+# "saved 356 11.9898162029453 2459 1" for 2501
 # Best stretch found for maximal sorted list:
-# "saved 352 11.984250405871 2440 1" --> true 11.9956951011839 can't be !!!!
+# "saved 352 11.984250405871 2440 1"
 
 # reorder them to calculate 'true' sum 1/DAGscore
 betterlist <- cond[best,]
@@ -246,13 +246,13 @@ ABmaster[,10] <- as.numeric(ABmaster[,10])
 
 # Calculation of how many scaffold are attributed to A and B chromosome
 table(ABmasterSorted$chrt)
-print(nttable(ABmaster))
-for (i in 1:10) print(nttable(ABmaster[ABmaster[,1]==i,]))
+print(nttable(ABmaster, 'All'))
+for (i in 1:10) print(nttable(ABmaster[ABmaster[,1]==i,], i))
 
 pdf(file=paste(getwd(),"/output/ABmaster2_maxsorted.pdf", sep=""), paper="a4r", width = (2967/100)/2.54, height = (2099/100)/2.54)
 for (chrno in 1:10) {
     plot(seq(1, chrlen[chrno], length.out=5), (0:4), type='n', sub=paste("chr #",chrno), xlab="nt", ylab="scaffolds", main="Randomly attributed E. tef scaffolds to A/B/umapped on Sorghum chromosomes")
-    apply(ABmaster[ABmaster$chr==chrno, c(2:3,8,10)], 1, function(z) {n<-jitter(as.numeric(z[4]), 5); x<- z[1:2]; y<-c(n,n); colr <- gircol[z[3]]; lines(x, y, col=colr, lwd=5)})
+    apply(ABmasteier[ABmaster$chr==chrno, c(2:3,8,10)], 1, function(z) {n<-jitter(as.numeric(z[4]), 5); x<- z[1:2]; y<-c(n,n); colr <- gircol[z[3]]; lines(x, y, col=colr, lwd=5)})
 }
 
 par(mfrow=c(2,5))

@@ -209,7 +209,6 @@ def find_synthenic_block(coordlist, scafname, D=12000000, mingen=3,
         chcheck = entry.chr == entry_old.chr and entry_old.number == entry.number and entry_old.score == entry.score and entry_old.block == entry.block
         if (  # Checks if on same chromosome or block.
               (entry_old.chr == 0 or (chcheck))):
-            orient = True
             if (  # Checks for distance between two mapping entries.
                   abs(entry.start - entry_old.end) <= D):
                 genes_in_row = genes_in_row + 1
@@ -256,12 +255,12 @@ def find_synthenic_block(coordlist, scafname, D=12000000, mingen=3,
             scafstart = 0
             block = block + 1
         if ecount == len(coordlist):  # Final check at the end of the list.
-            if genes_in_row >= mingen:
-                found_stretch.append(genes_in_row)
             synthenic_hits = __found_synthenic(synthenic_hits, genes_in_row,
                                                entry, cordstart,
                                                scafname, mingen, scafstart,
                                                block)
+            if genes_in_row >= mingen:
+                found_stretch.append(genes_in_row)
             # print("GATE1 " + str(entry.sori))
         entry_old = entry
     if plot:
