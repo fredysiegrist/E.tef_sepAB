@@ -4,22 +4,17 @@
 
 source("tef_analysis_functions_2015.R")
 
-
-##########
-#Load Data
-##########
-
-
 # set working directory and prepare output directory
 setwd("../../i1sz/")
 statdir <- file.path("output")
 
-
 # Loading the file
-cond <- read.delim(file="output.scoreminus1/stretches_condensed_12mio_scoreFirst.csv", header=FALSE, skip=0, comment.char = "")
-# cond <- read.delim(file="stretches_condensed_ac.csv", header=FALSE, skip=0, comment.char = "")
+# cond <- read.delim(file="output.scoreminus1/stretches_condensed_12mio_scoreFirst.csv", header=FALSE, skip=0, comment.char = "")
+cond <- read.delim(file="stretches_condensed_ac.csv", header=FALSE, skip=0, comment.char = "")
+
 colnames(cond) <- c("chr", "start", "end", "ori", "scaffold", "sstart", "send", "sori", "stretch", "number", "score", "reversion", "gir", "block", "position")
 cond$scaffold <- as.character(cond$scaffold)
+if (max(cond$score) > 1) cond[,11] <- 1/cond[,11]
 chrlen <- c(73840612, 77932577, 74440842, 68034345, 62352331, 62208772, 64342021, 55460251, 59635592, 60981625)
 
 # set colors for plotting
@@ -27,7 +22,6 @@ require('colorspace')
 seqcol <- heat_hcl(16, c=c(80,30), l = c(30,90), power = c(1/5, 1.5))
 scorecol <- terrain_hcl(20, c=c(65,0), l=c(45, 95), power=c(1/3, 1.5))
 seqcol[1] <- "#3C3CEC"
-
 
 # This is a very energy consuming thing, don't run it if not necessary
 pdf(file=paste(getwd(),"/output/density_map_chromosomes_cond.pdf", sep=""), paper="a4r", width = (2967/150)/2.54, height = (2099/150)/2.54)
@@ -83,13 +77,22 @@ legend(0, 2000, unique(remaster$chr), col=colors()[99:108], pch=16, ncol=5, titl
 outliers <- (1:length(connec))[abs((1:length(connec)) - connec) > sd((1:length(connec))- connec)]
 points(outliers, connec[outliers], pch="°", col="red", cex=2)
 
+pdf(file=paste(getwd(),"/output/positiondiffs.pdf", sep=""), width = 14, height = 10)
 betterlist <- cond[cond[,15]==1,]
 outlierpos <- cond[cond[,5] %in% slimmaster[outliers,2],]
 outlier <- outlierpos[outlierpos[,15]==2,]
 # write.csv(cbind(outlierpos[outlierpos[,15]==2,], outlierpos[outlierpos[,15]==1,]), file="outlier12.csv")
+betterlist[match(outlier$scaffold, betterlist$scaffold),] <- outlier
+betterlist <- betterlist[order((betterlist[,1]*1e10)+betterlist[,2]+betterlist[,3]),]
+betterremaster <- betterlist[,c(1, 5, 12)]
+newcon <- match(slimmaster$CHR2, betterremaster$scaffold, nomatch=NULL)
+updated <- (1:3018)[abs(newcon - connec) > 100] #match(outlier$scaffold, cond$scaffold)
+plot(1:3018, (1:3018)-newcon, pch=16, xlab="placement in better master", ylab="position difference", cex=1, main="ordering in master and 'better' master file", col=colors()[as.numeric(betterremaster$chr)+98])
+legend(0, 3, unique(betterremaster$chr), col=colors()[98:107], pch=16, ncol=5)
+points(updated, updated-newcon[updated], pch="°", col="green", cex=2)
+dev.off()
 
 # Iterate over the Stretches for outliers to find best combination of positions
-
 # overall penalty of the last 500 steps set to 500:1
 # poor man algorithm
 
@@ -145,11 +148,6 @@ while (counter < 2501 && length(unique(pos_diff))>1) {
         }
 }
 
-# Best stretch found for maximal unsorted list:
-# "saved 356 11.9898162029453 2459 1" for 2501
-# Best stretch found for maximal sorted list:
-# "saved 352 11.984250405871 2440 1"
-
 # reorder them to calculate 'true' sum 1/DAGscore
 betterlist <- cond[best,]
 betterlist <- betterlist[order((betterlist[,1]*1e10)+betterlist[,2]+betterlist[,3]),]
@@ -164,7 +162,7 @@ dev.off()
 
 # Generate a better master list and write
 bettermaster <- cbind(betterlist[,c(1:3, 5:7, 12, 13)], no=as.numeric(rownames(betterlist)), chrt=factor(rep("unmapped", dim(betterlist)[1]), levels=c("A", "B", "unmapped") ))
-write.table(bettermaster, file="output/bettermaster_maxsorted.delim", quote=FALSE, sep="\t")
+write.table(bettermaster, file="output/bettermaster_secondatonce.delim", quote=FALSE, sep="\t")
 
 # Definition of colors to display DAGchainer score
 max(as.numeric(rownames(bettermaster)))
@@ -176,7 +174,7 @@ girorder <- girs[order(unique(bettermaster[,8]))]
 transmatrix <- cbind(unique(bettermaster[,8]), order(girorder, decreasing = TRUE))
 gircol[transmatrix[,1]] <- gcol[transmatrix[,2]]
 
-pdf(file=paste(getwd(),"/output/bettrmaster_maxsorted.pdf", sep=""), paper="a4r", width = (2967/100)/2.54, height = (2099/100)/2.54)
+pdf(file=paste(getwd(),"/output/bettermaster_secondatonce.pdf", sep=""), paper="a4r", width = (2967/100)/2.54, height = (2099/100)/2.54)
 
 par(mfrow=c(2,5))
 for (chrno in 1:10) {
@@ -187,7 +185,6 @@ for (chrno in 1:10) {
 dev.off()
 
 # Split to A and B chromosome
-
 # 'Random' assignement to A and B chromosome starting on A, then B the rest
 # remains unmapped.
 for (entry in 1:dim(bettermaster)[1]) {
@@ -241,7 +238,7 @@ for (entry in 1:dim(ABmaster)[1]) {
 }
 
 ABmasterSorted <- ABmaster[order(ABmaster[,1]*1e10+(ABmaster[,2]+ABmaster[,3])/2),]
-write.table(ABmasterSorted, file="output/ABmaster_maxsorted.delim", quote=FALSE, sep="\t")
+write.table(ABmasterSorted, file="output/ABmaster_2atonce.delim", quote=FALSE, sep="\t")
 ABmaster[,10] <- as.numeric(ABmaster[,10])
 
 # Calculation of how many scaffold are attributed to A and B chromosome
@@ -249,7 +246,7 @@ table(ABmasterSorted$chrt)
 print(nttable(ABmaster, 'All'))
 for (i in 1:10) print(nttable(ABmaster[ABmaster[,1]==i,], i))
 
-pdf(file=paste(getwd(),"/output/ABmaster2_maxsorted.pdf", sep=""), paper="a4r", width = (2967/100)/2.54, height = (2099/100)/2.54)
+pdf(file=paste(getwd(),"/output/ABmaster2_maxsorted_2nd.pdf", sep=""), paper="a4r", width = (2967/100)/2.54, height = (2099/100)/2.54)
 for (chrno in 1:10) {
     plot(seq(1, chrlen[chrno], length.out=5), (0:4), type='n', sub=paste("chr #",chrno), xlab="nt", ylab="scaffolds", main="Randomly attributed E. tef scaffolds to A/B/umapped on Sorghum chromosomes")
     apply(ABmasteier[ABmaster$chr==chrno, c(2:3,8,10)], 1, function(z) {n<-jitter(as.numeric(z[4]), 5); x<- z[1:2]; y<-c(n,n); colr <- gircol[z[3]]; lines(x, y, col=colr, lwd=5)})
@@ -272,21 +269,8 @@ rangesX <- IRanges(ABmaster[ABmaster$chrt=="unmapped" & ABmaster$chr==actchr, 2]
 # Which rangesX contain at least one ranges?
 countOverlaps(ranges, rangesX, type="any")>0
 
-plotRanges <- function(x, xlim = x, main = deparse(substitute(x)), col = "black", sep = 0.5, ...) {
-height <- 1
-if (is(xlim, "Ranges"))
-xlim <- c(min(start(xlim)), max(end(xlim)))
-bins <- disjointBins(IRanges(start(x), end(x) + 1))
-plot.new()
-plot.window(xlim, c(0, max(bins)*(height + sep)))
-ybottom <- bins * (sep + height) - height
-rect(start(x)-0.5, ybottom, end(x)+0.5, ybottom + height, col = col, ...)
-title(main)
-axis(1)
-}
-
 # Easy plot the occupance on the genome
-pdf(file=paste(getwd(),"/output/plotRanges.pdf", sep=""), paper="a4r", width = (2967/100)/2.54, height = (2099/100)/2.54)
+pdf(file=paste(getwd(),"/output/plotRanges1.pdf", sep=""), paper="a4r", width = (2967/100)/2.54, height = (2099/100)/2.54)
 
 par(mfrow=c(2,5))
 for (chrno in 1:10) {
